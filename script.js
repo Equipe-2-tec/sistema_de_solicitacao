@@ -1,69 +1,83 @@
+// ======================================================
+// SISTEMA DE REGISTRO DE SOLICITAÇÕES
+// Equipe 5 - JavaScript e Integração
+// Mantém os IDs e os fluxos das telas HTML existentes.
+// ======================================================
 
-// ==========================================
-// CONFIGURACAO DA API PYTHON
-// ==========================================
+// Se o backend estiver em outro endereço, altere esta constante.
+// Em produção, use a URL pública do backend (não a URL do GitHub Pages).
+const API_BASE_URL = window.API_BASE_URL || "http://127.0.0.1:5000";
 
 const API = {
-    cadastro: "http://127.0.0.1:5000/cadastro",
-    login: "http://127.0.0.1:5000/login",
-    solicitacoes: "http://127.0.0.1:5000/solicitacoes"
+    cadastro: `${API_BASE_URL}/cadastro`,
+    login: `${API_BASE_URL}/login`,
+    solicitacoes: `${API_BASE_URL}/solicitacoes`
 };
 
-
-// ==========================================
-// FUNCAO DE COMUNICACAO COM A API
-// ==========================================
-
-async function enviarParaAPI(endereco, dados, metodo = "POST") {
-
+// ------------------------------------------------------
+// Comunicação centralizada com a API
+// ------------------------------------------------------
+async function enviarParaAPI(endereco, dados = null, metodo = "POST") {
     try {
-
-        const resposta = await fetch(endereco, {
+        const opcoes = {
             method: metodo,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: dados ? JSON.stringify(dados) : undefined
-        });
+            headers: { "Accept": "application/json" },
+            credentials: "include"
+        };
 
-        const resultado = await resposta.json();
+        if (dados !== null) {
+            opcoes.headers["Content-Type"] = "application/json";
+            opcoes.body = JSON.stringify(dados);
+        }
+
+        const resposta = await fetch(endereco, opcoes);
+        const texto = await resposta.text();
+        let resultado = {};
+
+        if (texto) {
+            try {
+                resultado = JSON.parse(texto);
+            } catch {
+                throw new Error("O servidor retornou uma resposta inválida.");
+            }
+        }
 
         if (!resposta.ok) {
             throw new Error(
-                resultado.erro || resultado.mensagem || "Erro na operação."
+                resultado.erro ||
+                resultado.mensagem ||
+                `Erro na operação (HTTP ${resposta.status}).`
             );
         }
 
         return resultado;
-
     } catch (erro) {
-
-        alert(erro.message || "Não foi possível comunicar com o servidor.");
-
-        console.error("Erro:", erro);
-
+        console.error("Erro na comunicação com a API:", erro);
+        alert(
+            erro.message.includes("Failed to fetch") || erro instanceof TypeError
+                ? "Não foi possível conectar ao servidor. Verifique se a API Python está ligada e se o endereço está correto."
+                : erro.message
+        );
         return null;
     }
 }
 
-
-// ==========================================
-// SISTEMA DE CADASTRO
-// ==========================================
-
+// ------------------------------------------------------
+// Cadastro
+// IDs esperados: cadastroForm, nome, email, usuario,
+// senha e confirmar.
+// ------------------------------------------------------
 const cadastroForm = document.getElementById("cadastroForm");
 
 if (cadastroForm) {
-
-    cadastroForm.addEventListener("submit", async function(event) {
-
+    cadastroForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const nome = document.getElementById("nome").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const usuario = document.getElementById("usuario").value.trim();
-        const senha = document.getElementById("senha").value;
-        const confirmar = document.getElementById("confirmar").value;
+        const nome = document.getElementById("nome")?.value.trim();
+        const email = document.getElementById("email")?.value.trim();
+        const usuario = document.getElementById("usuario")?.value.trim();
+        const senha = document.getElementById("senha")?.value;
+        const confirmar = document.getElementById("confirmar")?.value;
 
         if (!nome || !email || !usuario || !senha || !confirmar) {
             alert("Preencha todos os campos!");
@@ -75,144 +89,145 @@ if (cadastroForm) {
             return;
         }
 
-        const dadosCadastro = {
-            nome: nome,
-            email: email,
+        // O backend precisa receber também o campo "login".
+        const resultado = await enviarParaAPI(API.cadastro, {
+            nome,
+            email,
             login: usuario,
-            senha: senha
-        };
-
-        const resultado = await enviarParaAPI(
-            API.cadastro,
-            dadosCadastro
-        );
+            senha
+        });
 
         if (resultado) {
-
-            alert(resultado.mensagem);
-
+            alert(resultado.mensagem || "Usuário cadastrado com sucesso!");
             cadastroForm.reset();
-
-            window.location.href = "index.html";
+            // Mantém o fluxo original: volta para a tela inicial/login.
+            window.location.href = "index2.html";
         }
-
     });
 }
 
-
-// ==========================================
-// SISTEMA DE LOGIN
-// ==========================================
-
+// ------------------------------------------------------
+// Login
+// IDs esperados: loginForm, usuario e senha.
+// ------------------------------------------------------
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
-
-    loginForm.addEventListener("submit", async function(event) {
-
+    loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const usuario = document.getElementById("usuario").value.trim();
-        const senha = document.getElementById("senha").value;
+        const usuario = document.getElementById("usuario")?.value.trim();
+        const senha = document.getElementById("senha")?.value;
 
         if (!usuario || !senha) {
             alert("Preencha o login e a senha!");
             return;
         }
 
-        const dadosLogin = {
+        const resultado = await enviarParaAPI(API.login, {
             login: usuario,
-            senha: senha
-        };
-
-        const resultado = await enviarParaAPI(
-            API.login,
-            dadosLogin
-        );
+            senha
+        });
 
         if (resultado) {
+            alert(resultado.mensagem || "Login realizado com sucesso!");
 
-            alert(resultado.mensagem);
+            // Mantém compatibilidade com a interface já existente.
+            if (resultado.nome != null) {
+                sessionStorage.setItem("usuarioNome", resultado.nome);
+            }
+            if (resultado.id != null) {
+                sessionStorage.setItem("usuarioId", String(resultado.id));
+            }
 
-            // Guarda o nome para identificar o usuário na interface.
-            sessionStorage.setItem("usuarioNome", resultado.nome);
-            sessionStorage.setItem("usuarioId", resultado.id);
-
-            // Redirecionamento para a área do usuário.
-            // Crie painel.html para essa página.
             window.location.href = "painel.html";
         }
-
     });
 }
 
-
-// ==========================================
-// REGISTRAR SOLICITACAO
-// ==========================================
-
+// ------------------------------------------------------
+// Solicitações
+// Estas funções podem ser chamadas pelo painel.html.
+// ------------------------------------------------------
 async function registrarSolicitacao(nome, titulo, descricao) {
+    if (!nome || !titulo || !descricao) {
+        alert("Preencha o nome, o título e a descrição da solicitação.");
+        return null;
+    }
 
-    return await enviarParaAPI(
-        API.solicitacoes,
-        {
-            nome: nome,
-            titulo: titulo,
-            descricao: descricao
-        }
-    );
+    return await enviarParaAPI(API.solicitacoes, {
+        nome,
+        titulo,
+        descricao
+    });
 }
 
-
-// ==========================================
-// LISTAR SOLICITACOES
-// ==========================================
-
 async function listarSolicitacoes() {
-
     try {
+        const resposta = await fetch(API.solicitacoes, {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+            credentials: "include"
+        });
 
-        const resposta = await fetch(API.solicitacoes);
+        const texto = await resposta.text();
+        let resultado = texto ? JSON.parse(texto) : [];
 
         if (!resposta.ok) {
-            throw new Error("Erro ao listar solicitações.");
+            throw new Error(
+                resultado.erro ||
+                resultado.mensagem ||
+                "Erro ao listar solicitações."
+            );
         }
 
-        return await resposta.json();
-
+        return resultado;
     } catch (erro) {
-
-        console.error(erro);
-        alert("Não foi possível carregar as solicitações.");
-
+        console.error("Erro ao listar solicitações:", erro);
+        alert("Não foi possível carregar as solicitações. Verifique o servidor.");
         return null;
     }
 }
 
-
-// ==========================================
-// ATUALIZAR STATUS
-// ==========================================
-
 async function atualizarStatus(id, status) {
+    if (id == null || !status) {
+        alert("Informe o identificador e o novo status.");
+        return null;
+    }
 
     return await enviarParaAPI(
-        `${API.solicitacoes}/${id}`,
-        { status: status },
+        `${API.solicitacoes}/${encodeURIComponent(id)}`,
+        { status },
         "PUT"
     );
 }
 
-
-// ==========================================
-// EXCLUIR SOLICITACAO
-// ==========================================
-
 async function excluirSolicitacao(id) {
+    if (id == null) {
+        alert("Solicitação inválida.");
+        return null;
+    }
 
     return await enviarParaAPI(
-        `${API.solicitacoes}/${id}`,
+        `${API.solicitacoes}/${encodeURIComponent(id)}`,
         null,
         "DELETE"
     );
+}
+
+// ------------------------------------------------------
+// Logout opcional para o painel, caso exista botão com
+// id="logoutBtn". Requer rota POST /logout no backend.
+// ------------------------------------------------------
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+        const resultado = await enviarParaAPI(`${API_BASE_URL}/logout`, {});
+        if (resultado) {
+            sessionStorage.removeItem("usuarioNome");
+            sessionStorage.removeItem("usuarioId");
+            window.location.href = "index2.html";
+        }
+    });
 }
