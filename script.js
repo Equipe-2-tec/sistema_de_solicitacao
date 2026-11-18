@@ -1,55 +1,54 @@
 
 // ==========================================
-// SISTEMA DE REGISTRO DE SOLICITAÇÕES
-// EQUIPE 5 - JAVASCRIPT E INTEGRAÇÃO
+// CONFIGURACAO DA API PYTHON
 // ==========================================
 
-
-// X - CONFIGURAÇÃO DA API PYTHON
-// Os endereços serão preenchidos quando a Equipe 3 terminar.
-
 const API = {
-    cadastro: null,
-    login: null
+    cadastro: "http://127.0.0.1:5000/cadastro",
+    login: "http://127.0.0.1:5000/login",
+    solicitacoes: "http://127.0.0.1:5000/solicitacoes"
 };
 
 
-// X - FUNÇÃO PARA ENVIAR DADOS AO PYTHON
+// ==========================================
+// FUNCAO DE COMUNICACAO COM A API
+// ==========================================
 
-async function enviarParaAPI(endereco, dados) {
-
-    if (!endereco) {
-        alert("Backend ainda não conectado. Dados validados!");
-        return null;
-    }
+async function enviarParaAPI(endereco, dados, metodo = "POST") {
 
     try {
+
         const resposta = await fetch(endereco, {
-            method: "POST",
+            method: metodo,
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(dados)
+            body: dados ? JSON.stringify(dados) : undefined
         });
 
         const resultado = await resposta.json();
 
         if (!resposta.ok) {
-            throw new Error(resultado.mensagem || "Erro na solicitação.");
+            throw new Error(
+                resultado.erro || resultado.mensagem || "Erro na operação."
+            );
         }
 
         return resultado;
 
     } catch (erro) {
-        alert("Não foi possível comunicar com o servidor.");
-        console.error("Erro de comunicação:", erro);
+
+        alert(erro.message || "Não foi possível comunicar com o servidor.");
+
+        console.error("Erro:", erro);
+
         return null;
     }
 }
 
 
 // ==========================================
-// X - SISTEMA DE CADASTRO
+// SISTEMA DE CADASTRO
 // ==========================================
 
 const cadastroForm = document.getElementById("cadastroForm");
@@ -83,16 +82,18 @@ if (cadastroForm) {
             senha: senha
         };
 
-        // X - ENVIO DO CADASTRO AO PYTHON
-
         const resultado = await enviarParaAPI(
             API.cadastro,
             dadosCadastro
         );
 
         if (resultado) {
-            alert(resultado.mensagem || "Cadastro realizado!");
+
+            alert(resultado.mensagem);
+
             cadastroForm.reset();
+
+            window.location.href = "index.html";
         }
 
     });
@@ -100,7 +101,7 @@ if (cadastroForm) {
 
 
 // ==========================================
-// X - SISTEMA DE LOGIN
+// SISTEMA DE LOGIN
 // ==========================================
 
 const loginForm = document.getElementById("loginForm");
@@ -124,16 +125,94 @@ if (loginForm) {
             senha: senha
         };
 
-        // X - ENVIO DO LOGIN AO PYTHON
-
         const resultado = await enviarParaAPI(
             API.login,
             dadosLogin
         );
 
         if (resultado) {
-            alert(resultado.mensagem || "Login processado!");
+
+            alert(resultado.mensagem);
+
+            // Guarda o nome para identificar o usuário na interface.
+            sessionStorage.setItem("usuarioNome", resultado.nome);
+            sessionStorage.setItem("usuarioId", resultado.id);
+
+            // Redirecionamento para a área do usuário.
+            // Crie painel.html para essa página.
+            window.location.href = "painel.html";
         }
 
     });
+}
+
+
+// ==========================================
+// REGISTRAR SOLICITACAO
+// ==========================================
+
+async function registrarSolicitacao(nome, titulo, descricao) {
+
+    return await enviarParaAPI(
+        API.solicitacoes,
+        {
+            nome: nome,
+            titulo: titulo,
+            descricao: descricao
+        }
+    );
+}
+
+
+// ==========================================
+// LISTAR SOLICITACOES
+// ==========================================
+
+async function listarSolicitacoes() {
+
+    try {
+
+        const resposta = await fetch(API.solicitacoes);
+
+        if (!resposta.ok) {
+            throw new Error("Erro ao listar solicitações.");
+        }
+
+        return await resposta.json();
+
+    } catch (erro) {
+
+        console.error(erro);
+        alert("Não foi possível carregar as solicitações.");
+
+        return null;
+    }
+}
+
+
+// ==========================================
+// ATUALIZAR STATUS
+// ==========================================
+
+async function atualizarStatus(id, status) {
+
+    return await enviarParaAPI(
+        `${API.solicitacoes}/${id}`,
+        { status: status },
+        "PUT"
+    );
+}
+
+
+// ==========================================
+// EXCLUIR SOLICITACAO
+// ==========================================
+
+async function excluirSolicitacao(id) {
+
+    return await enviarParaAPI(
+        `${API.solicitacoes}/${id}`,
+        null,
+        "DELETE"
+    );
 }
