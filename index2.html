@@ -3,176 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Registro de Solicitações</title>
+<title>Cadastro Institucional - Sistema de Registro</title>
+
 <style>
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
+
 body {
-background: #ffffff;
-min-height: 100vh;
+    background: #ffffff;
+    min-height: 100vh;
 }
+
 header {
-background: white;
-padding: 25px 8%;
-border-bottom: 1px solid #e0e0e0;
+    padding: 25px 8%;
+    border-bottom: 1px solid #ddd;
 }
+
 header h1 {
-color: #16833b;
-font-size: 27px;
+    color: #16833b;
+    font-size: 27px;
 }
+
 main {
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 80vh;
-padding: 30px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
 }
-.container {
-background: white;
-width: 850px;
-max-width: 100%;
-display: flex;
-border-radius: 8px;
-box-shadow: 0 3px 18px #00000012;
-overflow: hidden;
+
+.cadastro {
+    background: white;
+    width: 450px;
+    max-width: 100%;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 3px 18px #00000012;
 }
-.login, .registro {
-width: 50%;
-padding: 55px 40px;
-}
-.login {
-border-right: 1px solid #eeeeee;
-}
+
 h2 {
-color: #16833b;
-margin-bottom: 15px;
-font-size: 25px;
+    color: #16833b;
+    margin-bottom: 12px;
 }
+
 p {
-color: #777777;
-margin-bottom: 25px;
-line-height: 1.5;
+    color: #777;
+    margin-bottom: 25px;
+    line-height: 1.5;
 }
+
 label {
-display: block;
-margin-bottom: 8px;
-color: #444444;
-font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 14px;
 }
+
 input {
-width: 100%;
-padding: 14px;
-margin-bottom: 20px;
-border: 1px solid #cccccc;
-border-radius: 4px;
-outline: none;
-font-size: 15px;
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
 }
+
 input:focus {
-border-color: #16833b;
+    outline: none;
+    border-color: #16833b;
 }
+
 button {
-width: 100%;
-padding: 14px;
-background: #16833b;
-color: white;
-border: none;
-border-radius: 4px;
-font-size: 16px;
-cursor: pointer;
-transition: 0.3s;
+    width: 100%;
+    padding: 14px;
+    background: #16833b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
 }
+
 button:hover {
-background: #10652d;
+    background: #10652d;
 }
-.registro {
-display: flex;
-flex-direction: column;
-justify-content: center;
-text-align: center;
-}
-.registro p {
-margin-top: 10px;
-}
-@media (max-width: 650px) {
-.container {
-flex-direction: column;
-}
-.login, .registro {
-width: 100%;
-padding: 35px 25px;
-}
-.login {
-border-right: none;
-border-bottom: 1px solid #eeeeee;
-}
-header h1 {
-font-size: 22px;
-}
-}
+
 a {
-margin-inline: 50px;
-border-radius: 10px;
-padding: 10px;
-text-decoration: none;
-color: white;
-background-color: #16833b;
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    border-radius: 5px;
+    padding: 12px;
+    text-decoration: none;
+    color: white;
+    background-color: #16833b;
 }
+
 a:hover {
-background: #10652d;
+    background: #10652d;
+}
+
+.aviso {
+    background: #f0f8f2;
+    border-left: 4px solid #16833b;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #444;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#mensagem {
+    margin-top: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 500px) {
+    header h1 {
+        font-size: 22px;
+    }
+
+    .cadastro {
+        padding: 30px 22px;
+    }
 }
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>Sistema de Registro de Solicitações</h1>
+    <h1>Sistema de Registro de Solicitações</h1>
 </header>
+
 <main>
-<div class="container">
-<section class="login">
-<h2>Login</h2>
-<p>Acesse sua conta</p>
 
-<form id="loginForm">
-<label for="usuario">Login</label>
-<input
-type="text"
-id="usuario"
-placeholder="Digite seu login"
-autocomplete="off"
-required
->
-<label for="senha">Senha</label>
-<input
-type="password"
-id="senha"
-placeholder="Digite sua senha"
-autocomplete="off"
-required
->
+<div class="cadastro">
 
-<!-- X: Botão necessário para enviar o formulário de login -->
-<button type="submit">Entrar</button>
-</form>
-</section>
-<section class="registro">
-<h2>Não tem uma conta?</h2>
-<p>
-Registre sua conta aqui e tenha acesso
-à sua área de usuário.
-</p>
-<a href="index.html" class="botao-registrar">
-Registrar
-</a>
-</section>
+    <h2>Criar conta institucional</h2>
+
+    <p>
+        Preencha os dados da instituição para realizar
+        a configuração inicial do sistema.
+    </p>
+
+    <div class="aviso">
+        Atenção: a conta institucional será criada
+        apenas uma vez pela escola e deverá passar
+        por uma validação institucional.
+    </div>
+
+    <form id="cadastroForm">
+
+        <label for="escola">Nome da escola</label>
+
+        <input
+            type="text"
+            id="escola"
+            name="escola"
+            placeholder="Digite o nome da escola"
+            autocomplete="organization"
+            required
+        >
+
+        <label for="email">E-mail institucional</label>
+
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Digite o e-mail institucional"
+            autocomplete="email"
+            required
+        >
+
+        <label for="responsavel">Nome do responsável pela criação</label>
+
+        <input
+            type="text"
+            id="responsavel"
+            name="responsavel"
+            placeholder="Digite o nome do responsável"
+            autocomplete="name"
+            required
+        >
+
+        <label for="senha">Senha</label>
+
+        <input
+            type="password"
+            id="senha"
+            name="senha"
+            placeholder="Crie uma senha"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
+
+        <label for="confirmar">Confirmação da senha</label>
+
+        <input
+            type="password"
+            id="confirmar"
+            name="confirmar"
+            placeholder="Confirme sua senha"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">
+            Criar conta institucional
+        </button>
+
+        <div id="mensagem" role="status"></div>
+
+    </form>
+
+    <a href="Tela_inicial.html">Voltar para a página inicial</a>
+
 </div>
+
 </main>
 
-<!-- X: Carrega o JavaScript da Equipe 5 -->
+<script>
+
+document.getElementById("cadastroForm").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const escola = document.getElementById("escola").value;
+    const email = document.getElementById("email").value;
+    const responsavel = document.getElementById("responsavel").value;
+    const senha = document.getElementById("senha").value;
+    const confirmar = document.getElementById("confirmar").value;
+
+    const mensagem = document.getElementById("mensagem");
+
+    if (senha.length < 8) {
+        mensagem.style.color = "red";
+        mensagem.textContent = "A senha deve possuir pelo menos 8 caracteres.";
+        return;
+    }
+
+    if (senha !== confirmar) {
+        mensagem.style.color = "red";
+        mensagem.textContent = "As senhas não correspondem. Confira novamente.";
+        return;
+    }
+
+    mensagem.style.color = "#16833b";
+
+    mensagem.textContent =
+        "Dados preenchidos corretamente! O cadastro deverá passar por validação institucional antes da liberação do acesso.";
+
+    // Os dados ainda precisam ser enviados
+    // para um servidor que realize a validação institucional.
+
+});
+
+</script>
+
 <script src="script.js"></script>
+
 </body>
 </html>
