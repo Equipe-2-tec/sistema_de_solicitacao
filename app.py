@@ -1,10 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
 
 app = Flask(__name__)
 
 criar_tabela()
+
+@app.route('/')
+def home():
+    return render_template('Tela_Inicial.html')
+
 
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
