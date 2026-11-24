@@ -185,78 +185,25 @@ button:hover, .botao:hover {
             e gerenciar as solicitações da escola.
         </p>
 
-        <a href="index.html" class="botao">
+        <a href="registro.html" class="botao">
             Criar conta institucional
         </a>
 
-        <button type="button" onclick="mostrarLogin()">
-            Já tenho uma conta
-        </button>
-
-    </section>
-
-    <!-- TELA DE LOGIN -->
-    <section class="login" id="telaLogin">
-
-        <h2>Login institucional</h2>
-
-        <p>
-            Informe suas credenciais institucionais
-            para acessar o sistema.
-        </p>
-
-        <form id="loginForm">
-
-            <label for="email">E-mail institucional</label>
-
-            <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Digite seu e-mail institucional"
-                autocomplete="username"
-                required
-            >
-
-            <label for="senha">Senha</label>
-
-            <input
-                type="password"
-                id="senha"
-                name="senha"
-                placeholder="Digite sua senha"
-                autocomplete="current-password"
-                required
-            >
-
-            <a href="#" class="link-recuperacao"
-               onclick="recuperarSenha(event)">
-                Esqueci minha senha
-            </a>
-
-            <button type="submit">
-                Entrar no sistema
-            </button>
-
-        </form>
-
-        <a href="#" class="voltar" onclick="voltarInicio(event)">
-            Voltar para a tela inicial
+        <a href="index2.html" class="botao">
+            Fazer login na conta institucional
         </a>
 
+        
+
     </section>
+
+    
 
 </div>
 
 </main>
 
 <script>
-
-// Mostrar a tela de login
-function mostrarLogin() {
-    document.getElementById("telaInicial").style.display = "none";
-    document.getElementById("telaLogin").style.display = "block";
-}
 
 // Voltar para a tela inicial
 function voltarInicio(event) {
