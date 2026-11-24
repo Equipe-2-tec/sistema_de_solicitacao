@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 
 criar_tabela()
 
