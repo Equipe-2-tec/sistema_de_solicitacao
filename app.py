@@ -8,7 +8,17 @@ criar_tabela()
 
 @app.route('/')
 def home():
-    return render_template('Tela_inicial.html', 'index.html')
+    return render_template('Tela_inicial.html')
+
+@app.route('/index.html')
+@app.route('/login')
+def pagina_index():
+    return render_template('index.html')
+
+@app.route('/bolsa')
+def pagina_bolsa():
+    return render_template('Bolsa de dados.html')
+
 
 
 @app.route('/cadastro', methods=['POST'])
