@@ -1,1 +1,128 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cadastro institucional</title>
+
+    <link rel="stylesheet" href="css/estilo.css">
+    <script src="js/app.js" defer></script>
+</head>
+
+<body data-page="register">
+
+    <main class="login-page">
+
+        <section class="login-box">
+
+            <h1>Criar conta institucional</h1>
+
+            <p class="subtitle">
+                Primeira configuração da instituição.
+            </p>
+
+            <!-- Aviso de validação -->
+            <div class="notice warn">
+                A solicitação de cadastro deve passar por validação
+                institucional antes da liberação do acesso.
+            </div>
+
+            <!-- Formulário de cadastro -->
+            <form id="cadastroForm">
+
+                <!-- Nome da escola -->
+                <div class="field">
+                    <label for="escola">Nome da escola</label>
+
+                    <input
+                        id="escola"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <!-- E-mail institucional -->
+                <div class="field">
+                    <label for="email">E-mail institucional</label>
+
+                    <input
+                        id="email"
+                        type="email"
+                        required
+                    >
+                </div>
+
+                <!-- Responsável pelo cadastro -->
+                <div class="field">
+                    <label for="responsavel">
+                        Nome do responsável pela criação
+                    </label>
+
+                    <input
+                        id="responsavel"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <!-- Senha -->
+                <div class="field">
+                    <label for="senha">
+                        Senha (mínimo 8 caracteres)
+                    </label>
+
+                    <input
+                        id="senha"
+                        type="password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <!-- Confirmação de senha -->
+                <div class="field">
+                    <label for="confirmar">
+                        Confirmação da senha
+                    </label>
+
+                    <input
+                        id="confirmar"
+                        type="password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <!-- Botão de envio -->
+                <button type="submit">
+                    Enviar cadastro para validação
+                </button>
+
+                <!-- Mensagem de retorno -->
+                <p
+                    id="registerMsg"
+                    class="muted"
+                    style="margin-top: 12px;"
+                ></p>
+
+            </form>
+
+            <!-- Navegação -->
+            <div class="login-links">
+
+                <a href="index2.html">
+                    Voltar ao login
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
+
