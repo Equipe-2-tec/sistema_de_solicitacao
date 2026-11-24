@@ -11,12 +11,13 @@ criar_tabela()
 def home():
     return render_template('Tela_inicial.html')
 
-@app.route('/index.html')
+@app.route('/index2.html')
 @app.route('/login')
 def pagina_index():
     return render_template('index2.html')
 
-@app.route('/bolsa')
+@app.route('/cadastro.html')
+@app.route('/cadastro')
 def cadastro():
     return render_template('cadastro.html')
 
