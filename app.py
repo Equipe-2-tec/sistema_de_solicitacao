@@ -2,13 +2,13 @@ from flask import Flask, request, jsonify, render_template
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
 criar_tabela()
 
 @app.route('/')
 def home():
-    return render_template('Tela_Inicial.html')
+    return render_template('Tela_inicial.html')
 
 
 @app.route('/cadastro', methods=['POST'])
