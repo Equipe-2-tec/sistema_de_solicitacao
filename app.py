@@ -7,6 +7,7 @@ app = Flask(__name__)
 criar_tabela()
 
 @app.route('/')
+@app.route('/Tela_inicial.html')
 def home():
     return render_template('Tela_inicial.html')
 
