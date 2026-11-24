@@ -21,6 +21,7 @@ def pagina_index():
 def cadastrar():
     return render_template('registro.html')
 
+@app.route('/painel.html')
 @app.route('/painel')
 def painel():
     return render_template('painel.html')
