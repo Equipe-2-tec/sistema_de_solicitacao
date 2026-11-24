@@ -6,7 +6,7 @@
 
 // Se o backend estiver em outro endereço, altere esta constante.
 // Em produção, use a URL pública do backend (não a URL do GitHub Pages).
-const API_BASE_URL = window.API_BASE_URL || "http://127.0.0.1:5000";
+const API_BASE_URL = window.API_BASE_URL || window.location.origin;
 
 const API = {
     cadastro: `${API_BASE_URL}/cadastro`,

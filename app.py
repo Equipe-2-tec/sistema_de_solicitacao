@@ -21,7 +21,6 @@ def pagina_bolsa():
     return render_template('Bolsa de dados.html')
 
 
-
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
 
