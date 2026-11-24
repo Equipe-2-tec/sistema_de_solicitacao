@@ -18,7 +18,7 @@ def pagina_index():
 
 @app.route('/cadastro.html')
 @app.route('/cadastro')
-def cadastro():
+def cadastrar():
     return render_template('cadastro.html')
 
 
