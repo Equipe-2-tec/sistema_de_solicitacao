@@ -16,10 +16,10 @@ def home():
 def pagina_index():
     return render_template('index2.html')
 
-@app.route('/cadastro.html')
+@app.route('/registro.html')
 @app.route('/cadastro')
 def cadastrar():
-    return render_template('cadastro.html')
+    return render_template('registro.html')
 
 
 @app.route('/cadastro', methods=['POST'])
