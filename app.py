@@ -8,7 +8,7 @@ criar_tabela()
 
 @app.route('/')
 def home():
-    return render_template('Tela_inicial.html')
+    return render_template('Tela_inicial.html', 'index.html')
 
 
 @app.route('/cadastro', methods=['POST'])
