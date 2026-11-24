@@ -1,72 +1,774 @@
 
-:root{--green:#16833b;--green-dark:#10652d;--green-light:#eaf6ee;--ink:#24312a;--muted:#6b776f;--line:#e4ebe6;--bg:#f5f8f6;--red:#c0392b;--orange:#d97706;--blue:#2563eb}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:var(--bg);color:var(--ink);min-height:100vh}
-a{color:var(--green);text-decoration:none}
-button,.btn{border:0;border-radius:8px;padding:11px 15px;background:var(--green);color:#fff;font-weight:600;cursor:pointer;display:inline-block;text-align:center}
-button:hover,.btn:hover{background:var(--green-dark)}
-.btn.secondary,button.secondary{background:#e8efea;color:#285438}
-.btn.danger,button.danger{background:#b9382c}
-.btn.warning,button.warning{background:#d97706}
-.btn.small,button.small{padding:7px 10px;font-size:13px}
-header.top{background:#fff;border-bottom:1px solid var(--line);padding:17px 4%;display:flex;justify-content:space-between;align-items:center;gap:15px}
-.brand{font-size:20px;color:var(--green);font-weight:700}
-.top-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px}
-.layout{display:grid;grid-template-columns:235px 1fr;min-height:calc(100vh - 65px)}
-.sidebar{background:#fff;border-right:1px solid var(--line);padding:22px 14px}
-.sidebar .section-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#89958d;margin:8px 10px 12px}
-.sidebar a{display:block;padding:11px 12px;border-radius:8px;color:#405047;margin:3px 0;font-size:14px}
-.sidebar a:hover,.sidebar a.active{background:var(--green-light);color:var(--green);font-weight:700}
-.content{padding:28px;max-width:1400px;width:100%;margin:auto}
-h1{font-size:26px;margin-bottom:8px;color:#203b2a}
-.subtitle{color:var(--muted);margin-bottom:24px;line-height:1.5}
-h2{font-size:18px;margin-bottom:14px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 3px 12px #153b2010}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}
-.stat{font-size:30px;font-weight:700;color:var(--green);margin:8px 0}
-.stat-label{font-size:13px;color:var(--muted)}
-.cards-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
-form{display:grid;gap:10px}
-label{font-size:13px;font-weight:700;color:#405047}
-input,select,textarea{width:100%;padding:12px;border:1px solid #cfd9d2;border-radius:8px;background:#fff;font-size:14px;color:var(--ink)}
-textarea{min-height:105px;resize:vertical}
-input:focus,select:focus,textarea:focus{outline:2px solid #b6dfc3;border-color:var(--green)}
-.field{margin-bottom:8px}
-.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:10px}
-table{width:100%;border-collapse:collapse;min-width:650px}
-th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
-th{background:#f2f7f3;color:#405047}
-tr:last-child td{border-bottom:0}
-.badge{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700;background:#e8efea;color:#405047}
-.badge.urgente,.badge.alta{background:#fde8e6;color:#a12c22}
-.badge.media{background:#fff1d6;color:#965b00}
-.badge.baixa,.badge.resolvida{background:#e5f5e9;color:#176b35}
-.badge.em-andamento{background:#e6efff;color:#2457a6}
-.badge.pendente{background:#fff1d6;color:#965b00}
-.notice{padding:13px 15px;border-radius:8px;background:#edf6ef;border-left:4px solid var(--green);color:#385443;font-size:13px;line-height:1.5;margin:14px 0}
-.notice.warn{background:#fff7e8;border-color:var(--orange);color:#80500b}
-.empty{padding:25px;text-align:center;color:var(--muted)}
-.school-map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.place{border:2px solid var(--line);border-radius:10px;background:#fff;padding:18px;cursor:pointer;text-align:left;color:var(--ink);min-height:100px}
-.place:hover{border-color:var(--green);background:var(--green-light)}
-.place strong{display:block;margin:8px 0 4px}
-.place small{color:var(--muted)}
-.place.has-open{border-color:#e7a2a0;background:#fff7f6}
-.legend{display:flex;gap:15px;flex-wrap:wrap;margin:15px 0;font-size:12px;color:var(--muted)}
-.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;background:#2e9d50}
-.dot.red{background:#d94b42}.dot.yellow{background:#e6a12c}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:15px}
-.filters .field{min-width:150px;flex:1}
-.login-page{display:flex;align-items:center;justify-content:center;padding:30px 15px;min-height:100vh}
-.login-box{width:460px;max-width:100%;background:#fff;padding:32px;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 25px #0000000c}
-.login-box h1{color:var(--green);font-size:24px;margin-bottom:10px}
-.login-box .field{margin:14px 0}
-.login-box .btn, .login-box button{width:100%}
-.login-links{display:flex;justify-content:space-between;gap:12px;margin-top:17px;font-size:13px;flex-wrap:wrap}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.footer-note{font-size:12px;color:var(--muted);margin-top:22px;line-height:1.5}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:190px 1fr}.content{padding:20px}}
-@media(max-width:650px){header.top{align-items:flex-start;flex-direction:column}.layout{display:block}.sidebar{display:flex;overflow-x:auto;gap:4px;padding:8px;border-right:0;border-bottom:1px solid var(--line)}.sidebar .section-label{display:none}.sidebar a{white-space:nowrap;font-size:12px;padding:9px}.content{padding:17px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat{font-size:24px}.cards-2,.form-grid{grid-template-columns:1fr}.school-map{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:15px}h1{font-size:22px}}
-@media print{.sidebar,header.top,.no-print,button,.btn{display:none!important}.layout{display:block}.content{padding:0}.card{box-shadow:none}}
+/* ==========================================
+   1. VARIÁVEIS GLOBAIS
+========================================== */
+
+:root {
+    --green: #16833b;
+    --green-dark: #10652d;
+    --green-light: #eaf6ee;
+
+    --ink: #24312a;
+    --muted: #6b776f;
+
+    --line: #e4ebe6;
+    --bg: #f5f8f6;
+
+    --red: #c0392b;
+    --orange: #d97706;
+    --blue: #2563eb;
+}
+
+
+/* ==========================================
+   2. RESET E CONFIGURAÇÕES GERAIS
+========================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+}
+
+a {
+    color: var(--green);
+    text-decoration: none;
+}
+
+
+/* ==========================================
+   3. BOTÕES
+========================================== */
+
+button,
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 11px 15px;
+
+    background: var(--green);
+    color: #fff;
+
+    font-weight: 600;
+    cursor: pointer;
+
+    display: inline-block;
+    text-align: center;
+}
+
+button:hover,
+.btn:hover {
+    background: var(--green-dark);
+}
+
+/* Botão secundário */
+.btn.secondary,
+button.secondary {
+    background: #e8efea;
+    color: #285438;
+}
+
+/* Botão de perigo */
+.btn.danger,
+button.danger {
+    background: #b9382c;
+}
+
+/* Botão de aviso */
+.btn.warning,
+button.warning {
+    background: #d97706;
+}
+
+/* Botão pequeno */
+.btn.small,
+button.small {
+    padding: 7px 10px;
+    font-size: 13px;
+}
+
+
+/* ==========================================
+   4. CABEÇALHO
+========================================== */
+
+header.top {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+
+    padding: 17px 4%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+}
+
+.brand {
+    font-size: 20px;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.top-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+
+/* ==========================================
+   5. ESTRUTURA PRINCIPAL
+========================================== */
+
+.layout {
+    display: grid;
+    grid-template-columns: 235px 1fr;
+
+    min-height: calc(100vh - 65px);
+}
+
+
+/* ==========================================
+   6. BARRA LATERAL
+========================================== */
+
+.sidebar {
+    background: #fff;
+    border-right: 1px solid var(--line);
+
+    padding: 22px 14px;
+}
+
+.sidebar .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    color: #89958d;
+
+    margin: 8px 10px 12px;
+}
+
+.sidebar a {
+    display: block;
+
+    padding: 11px 12px;
+    border-radius: 8px;
+
+    color: #405047;
+
+    margin: 3px 0;
+    font-size: 14px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: var(--green-light);
+    color: var(--green);
+    font-weight: 700;
+}
+
+
+/* ==========================================
+   7. ÁREA DE CONTEÚDO
+========================================== */
+
+.content {
+    padding: 28px;
+
+    max-width: 1400px;
+    width: 100%;
+
+    margin: auto;
+}
+
+
+/* ==========================================
+   8. TÍTULOS E TEXTOS
+========================================== */
+
+h1 {
+    font-size: 26px;
+    margin-bottom: 8px;
+    color: #203b2a;
+}
+
+h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+.subtitle {
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================
+   9. CARDS
+========================================== */
+
+.card {
+    background: #fff;
+
+    border: 1px solid var(--line);
+    border-radius: 12px;
+
+    padding: 20px;
+
+    box-shadow: 0 3px 12px #153b2010;
+}
+
+
+/* ==========================================
+   10. GRID E ESTATÍSTICAS
+========================================== */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    font-size: 30px;
+    font-weight: 700;
+
+    color: var(--green);
+
+    margin: 8px 0;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.cards-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+
+    flex-wrap: wrap;
+    margin: 14px 0;
+}
+
+
+/* ==========================================
+   11. FORMULÁRIOS
+========================================== */
+
+form {
+    display: grid;
+    gap: 10px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #405047;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #cfd9d2;
+    border-radius: 8px;
+
+    background: #fff;
+
+    font-size: 14px;
+    color: var(--ink);
+}
+
+textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+/* Efeito ao selecionar um campo */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #b6dfc3;
+    border-color: var(--green);
+}
+
+.field {
+    margin-bottom: 8px;
+}
+
+/* Formulário com duas colunas */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+/* ==========================================
+   12. TABELAS
+========================================== */
+
+.table-wrap {
+    overflow-x: auto;
+
+    background: #fff;
+
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    min-width: 650px;
+}
+
+th,
+td {
+    text-align: left;
+
+    padding: 12px;
+
+    border-bottom: 1px solid var(--line);
+
+    font-size: 13px;
+    vertical-align: top;
+}
+
+th {
+    background: #f2f7f3;
+    color: #405047;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+
+/* ==========================================
+   13. BADGES E STATUS
+========================================== */
+
+.badge {
+    display: inline-block;
+
+    border-radius: 20px;
+    padding: 5px 9px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    background: #e8efea;
+    color: #405047;
+}
+
+/* Status urgente e alta */
+.badge.urgente,
+.badge.alta {
+    background: #fde8e6;
+    color: #a12c22;
+}
+
+/* Status médio */
+.badge.media {
+    background: #fff1d6;
+    color: #965b00;
+}
+
+/* Status baixo e resolvido */
+.badge.baixa,
+.badge.resolvida {
+    background: #e5f5e9;
+    color: #176b35;
+}
+
+/* Status em andamento */
+.badge.em-andamento {
+    background: #e6efff;
+    color: #2457a6;
+}
+
+/* Status pendente */
+.badge.pendente {
+    background: #fff1d6;
+    color: #965b00;
+}
+
+
+/* ==========================================
+   14. AVISOS
+========================================== */
+
+.notice {
+    padding: 13px 15px;
+
+    border-radius: 8px;
+
+    background: #edf6ef;
+    border-left: 4px solid var(--green);
+
+    color: #385443;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    margin: 14px 0;
+}
+
+/* Aviso de atenção */
+.notice.warn {
+    background: #fff7e8;
+    border-color: var(--orange);
+    color: #80500b;
+}
+
+
+/* ==========================================
+   15. ESTADO VAZIO
+========================================== */
+
+.empty {
+    padding: 25px;
+    text-align: center;
+    color: var(--muted);
+}
+
+
+/* ==========================================
+   16. MAPA DA ESCOLA
+========================================== */
+
+.school-map {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+.place {
+    border: 2px solid var(--line);
+    border-radius: 10px;
+
+    background: #fff;
+
+    padding: 18px;
+
+    cursor: pointer;
+    text-align: left;
+
+    color: var(--ink);
+
+    min-height: 100px;
+}
+
+.place:hover {
+    border-color: var(--green);
+    background: var(--green-light);
+}
+
+.place strong {
+    display: block;
+    margin: 8px 0 4px;
+}
+
+.place small {
+    color: var(--muted);
+}
+
+/* Local com ocorrência */
+.place.has-open {
+    border-color: #e7a2a0;
+    background: #fff7f6;
+}
+
+
+/* ==========================================
+   17. LEGENDA E INDICADORES
+========================================== */
+
+.legend {
+    display: flex;
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+    margin: 15px 0;
+
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+
+    margin-right: 5px;
+
+    background: #2e9d50;
+}
+
+.dot.red {
+    background: #d94b42;
+}
+
+.dot.yellow {
+    background: #e6a12c;
+}
+
+
+/* ==========================================
+   18. FILTROS
+========================================== */
+
+.filters {
+    display: flex;
+    gap: 10px;
+
+    flex-wrap: wrap;
+    align-items: end;
+
+    margin-bottom: 15px;
+}
+
+.filters .field {
+    min-width: 150px;
+    flex: 1;
+}
+
+
+/* ==========================================
+   19. TELA DE LOGIN E CADASTRO
+========================================== */
+
+.login-page {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px 15px;
+
+    min-height: 100vh;
+}
+
+.login-box {
+    width: 460px;
+    max-width: 100%;
+
+    background: #fff;
+
+    padding: 32px;
+
+    border: 1px solid var(--line);
+    border-radius: 14px;
+
+    box-shadow: 0 5px 25px #0000000c;
+}
+
+.login-box h1 {
+    color: var(--green);
+
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.login-box .field {
+    margin: 14px 0;
+}
+
+.login-box .btn,
+.login-box button {
+    width: 100%;
+}
+
+/* Links da tela de login */
+.login-links {
+    display: flex;
+
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-top: 17px;
+
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+/* Rodapé da tela de login */
+.footer-note {
+    font-size: 12px;
+    color: var(--muted);
+
+    margin-top: 22px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================
+   20. RESPONSIVIDADE - TABLETS
+========================================== */
+
+@media (max-width: 900px) {
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .layout {
+        grid-template-columns: 190px 1fr;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+}
+
+
+/* ==========================================
+   21. RESPONSIVIDADE - CELULARES
+========================================== */
+
+@media (max-width: 650px) {
+
+    /* Cabeçalho */
+    header.top {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    /* Layout */
+    .layout {
+        display: block;
+    }
+
+    /* Barra lateral */
+    .sidebar {
+        display: flex;
+
+        overflow-x: auto;
+        gap: 4px;
+
+        padding: 8px;
+
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar .section-label {
+        display: none;
+    }
+
+    .sidebar a {
+        white-space: nowrap;
+
+        font-size: 12px;
+        padding: 9px;
+    }
+
+    /* Conteúdo */
+    .content {
+        padding: 17px;
+    }
+
+    /* Cards */
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .stat {
+        font-size: 24px;
+    }
+
+    /* Layouts */
+    .cards-2,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Mapa */
+    .school-map {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Cards */
+    .card {
+        padding: 15px;
+    }
+
+    /* Títulos */
+    h1 {
+        font-size: 22px;
+    }
+
+}
+
+
+/* ==========================================
+   22. IMPRESSÃO
+========================================== */
+
+@media print {
+
+    .sidebar,
+    header.top,
+    .no-print,
+    button,
+    .btn {
+        display: none !important;
+    }
+
+    .layout {
+        display: block;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .card {
+        box-shadow: none;
+    }
+
+}
