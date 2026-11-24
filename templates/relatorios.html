@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatórios - Sistema de Registro</title><link rel="stylesheet" href="css/estilo.css">
+<script src="js/app.js" defer></script>
+</head>
+<body data-page="reports">
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!sessionStorage.getItem('sistemaSessao_v1')) return;
+ const links=[['painel.html','Painel'],['mapa.html','Mapa da escola'],['registrar-ocorrencia.html','Registrar ocorrência'],['ocorrencias.html','Ocorrências'],['gestao.html','Gestão'],['relatorios.html','Relatórios'],['comunicados.html','Comunicados'],['historico.html','Histórico'],['atividades.html','Atividades']];
+ const s=JSON.parse(sessionStorage.getItem('sistemaSessao_v1'));
+ document.body.innerHTML=`<header class="top"><div class="brand">Sistema de Registro de Solicitações</div><div class="top-right"><span>${s.email} • ${s.sector}</span><button class="secondary small no-print" onclick="logout()">Sair</button></div></header><div class="layout"><nav class="sidebar"><div class="section-label">Menu principal</div>${links.map(([u,l])=>`<a class="${u==='relatorios.html'?'active':''}" href="${u}">${l}</a>`).join('')}</nav><main class="content"><h1>Relatórios</h1><p class="subtitle">Gere visões diárias, semanais ou mensais e exporte os dados.</p>
+<div class="card no-print"><div class="filters"><div class="field"><label for="period">Período do relatório</label><select id="period"><option>Diário</option><option>Semanal</option><option>Mensal</option></select></div><button id="printReport" type="button">Imprimir / salvar em PDF</button><button id="csvReport" type="button" class="secondary">Exportar planilha CSV</button></div></div>
+<div id="reportSummary" style="margin-top:16px"></div>
+</main></div>`;
+ });
+</script>
+</body></html>

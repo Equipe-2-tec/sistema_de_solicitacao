@@ -1,0 +1,29 @@
+SISTEMA DE REGISTRO DE SOLICITAÇÕES - PROTÓTIPO ACADÊMICO
+
+COMO EXECUTAR
+1. Extraia todos os arquivos mantendo as pastas css e js.
+2. Abra index2.html no navegador.
+3. Use o acesso demonstrativo:
+   E-mail: secretaria@escola.com
+   Senha: Escola123!
+4. Escolha Secretaria ou Gestão para testar as áreas.
+5. Para cadastrar ocorrências, use o menu ou o mapa da escola.
+
+PÁGINAS
+index2.html                 Login institucional
+registro.html               Cadastro institucional
+painel.html                 Painel principal
+mapa.html                   Mapa ilustrativo da escola
+registrar-ocorrencia.html   Formulário de ocorrências
+ocorrencias.html            Consulta e filtros
+gestao.html                 Prioridade, situação e providências
+relatorios.html             Relatórios e exportação
+comunicados.html            Mural e publicação de comunicados
+historico.html              Histórico de ocorrências
+atividades.html             Registro de atividades
+
+IMPORTANTE
+Este é um protótipo front-end. Os dados ficam no armazenamento local do navegador (localStorage/sessionStorage).
+A validação institucional, autenticação segura, controle de permissões real, recuperação de senha por e-mail e upload permanente de anexos exigem backend, banco de dados e serviço de autenticação.
+O cadastro enviado fica marcado como pendente; a aprovação real não é implementada neste protótipo.
+A exportação CSV pode ser aberta em programas de planilha. A opção de impressão permite escolher "Salvar como PDF" no navegador.

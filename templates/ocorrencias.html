@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocorrências registradas - Sistema de Registro</title><link rel="stylesheet" href="css/estilo.css">
+<script src="js/app.js" defer></script>
+</head>
+<body data-page="occurrences">
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!sessionStorage.getItem('sistemaSessao_v1')) return;
+ const links=[['painel.html','Painel'],['mapa.html','Mapa da escola'],['registrar-ocorrencia.html','Registrar ocorrência'],['ocorrencias.html','Ocorrências'],['gestao.html','Gestão'],['relatorios.html','Relatórios'],['comunicados.html','Comunicados'],['historico.html','Histórico'],['atividades.html','Atividades']];
+ const s=JSON.parse(sessionStorage.getItem('sistemaSessao_v1'));
+ document.body.innerHTML=`<header class="top"><div class="brand">Sistema de Registro de Solicitações</div><div class="top-right"><span>${s.email} • ${s.sector}</span><button class="secondary small no-print" onclick="logout()">Sair</button></div></header><div class="layout"><nav class="sidebar"><div class="section-label">Menu principal</div>${links.map(([u,l])=>`<a class="${u==='ocorrencias.html'?'active':''}" href="${u}">${l}</a>`).join('')}</nav><main class="content"><h1>Ocorrências registradas</h1><p class="subtitle">Consulte os protocolos e filtre os problemas por local, categoria, data, prioridade e situação.</p>
+<div class="card no-print"><div class="filters">
+<div class="field"><label for="filterLocal">Local</label><select id="filterLocal"><option value="">Todos</option><option>Salas de aula</option><option>Banheiros</option><option>Biblioteca</option><option>Laboratórios</option><option>Pátio</option><option>Quadra</option><option>Secretaria</option><option>Refeitório</option><option>Corredores</option></select></div>
+<div class="field"><label for="filterCategory">Categoria</label><select id="filterCategory"><option value="">Todas</option><option>Estrutura física</option><option>Elétrica</option><option>Hidráulica</option><option>Limpeza</option><option>Equipamentos</option><option>Segurança</option><option>Tecnologia</option><option>Outros</option></select></div>
+<div class="field"><label for="filterDate">Data</label><input type="date" id="filterDate"></div>
+<div class="field"><label for="filterPriority">Prioridade</label><select id="filterPriority"><option value="">Todas</option><option>Baixa</option><option>Média</option><option>Alta</option><option>Urgente</option><option>Não definida</option></select></div>
+<div class="field"><label for="filterStatus">Situação</label><select id="filterStatus"><option value="">Todas</option><option>Pendente</option><option>Em andamento</option><option>Resolvida</option><option>Não resolvida</option></select></div>
+</div></div><div id="occurrenceList"></div>
+</main></div>`;
+ });
+</script>
+</body></html>

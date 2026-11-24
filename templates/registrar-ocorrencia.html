@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrar ocorrência - Sistema de Registro</title><link rel="stylesheet" href="css/estilo.css">
+<script src="js/app.js" defer></script>
+</head>
+<body data-page="occurrence-form">
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!sessionStorage.getItem('sistemaSessao_v1')) return;
+ const links=[['painel.html','Painel'],['mapa.html','Mapa da escola'],['registrar-ocorrencia.html','Registrar ocorrência'],['ocorrencias.html','Ocorrências'],['gestao.html','Gestão'],['relatorios.html','Relatórios'],['comunicados.html','Comunicados'],['historico.html','Histórico'],['atividades.html','Atividades']];
+ const s=JSON.parse(sessionStorage.getItem('sistemaSessao_v1'));
+ document.body.innerHTML=`<header class="top"><div class="brand">Sistema de Registro de Solicitações</div><div class="top-right"><span>${s.email} • ${s.sector}</span><button class="secondary small no-print" onclick="logout()">Sair</button></div></header><div class="layout"><nav class="sidebar"><div class="section-label">Menu principal</div>${links.map(([u,l])=>`<a class="${u==='registrar-ocorrencia.html'?'active':''}" href="${u}">${l}</a>`).join('')}</nav><main class="content"><h1>Registrar ocorrência</h1><p class="subtitle">Informe os dados do problema para gerar um protocolo de acompanhamento.</p>
+<div class="card"><form id="occurrenceForm">
+<div class="form-grid"><div class="field"><label for="titulo">Título do problema</label><input id="titulo" required placeholder="Ex.: Lâmpada queimada"></div><div class="field"><label for="local">Ambiente / local</label><select id="local" required><option value="">Selecione o local</option><option>Salas de aula</option><option>Banheiros</option><option>Biblioteca</option><option>Laboratórios</option><option>Pátio</option><option>Quadra</option><option>Secretaria</option><option>Refeitório</option><option>Corredores</option></select></div>
+<div class="field"><label for="categoria">Categoria</label><select id="categoria" required><option value="">Selecione</option><option>Estrutura física</option><option>Elétrica</option><option>Hidráulica</option><option>Limpeza</option><option>Equipamentos</option><option>Segurança</option><option>Tecnologia</option><option>Outros</option></select></div>
+<div class="field"><label for="anexos">Fotografias ou documentos</label><input id="anexos" type="file" accept="image/*,.pdf,.doc,.docx" multiple><small class="muted">Neste protótipo, os nomes dos anexos são registrados; o envio real exige servidor.</small></div></div>
+<div class="field"><label for="descricao">Descrição detalhada</label><textarea id="descricao" required placeholder="Explique o que aconteceu, quando foi identificado e outras informações importantes."></textarea></div>
+<button type="submit">Registrar ocorrência</button><p id="occurrenceMsg" class="notice" role="status"></p>
+</form></div>
+</main></div>`;
+ });
+</script>
+</body></html>
