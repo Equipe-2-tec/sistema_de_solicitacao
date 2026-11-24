@@ -1,79 +1,431 @@
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Acesso institucional</title>
+    <title>Acesso institucional - Sistema de Registro</title>
 
     <script src="static/app.js" defer></script>
+
+    <style>
+        /* =========================
+           VARIÁVEIS
+        ========================= */
+
+        :root {
+            --green: #16833b;
+            --green-dark: #10652d;
+            --green-light: #eaf6ee;
+
+            --ink: #24312a;
+            --muted: #6b776f;
+
+            --line: #e4ebe6;
+            --bg: #f5f8f6;
+
+            --red: #c0392b;
+            --orange: #d97706;
+            --blue: #2563eb;
+        }
+
+        /* =========================
+           RESET
+        ========================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================
+           BOTÕES
+        ========================= */
+
+        .button,
+        .btn,
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 15px;
+
+            background: var(--green);
+            color: #ffffff;
+
+            font-weight: 600;
+            font-size: 15px;
+
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+
+            transition: background 0.2s ease;
+        }
+
+        .button:hover,
+        .btn:hover,
+        button:hover {
+            background: var(--green-dark);
+            text-decoration: none;
+        }
+
+        .btn.secondary,
+        button.secondary {
+            background: #e8efea;
+            color: #285438;
+        }
+
+        .btn.danger,
+        button.danger {
+            background: var(--red);
+        }
+
+        .btn.warning,
+        button.warning {
+            background: var(--orange);
+        }
+
+        .btn.small,
+        button.small {
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+
+        /* =========================
+           FORMULÁRIOS
+        ========================= */
+
+        .field {
+            margin-bottom: 17px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+
+            border: 1px solid var(--line);
+            border-radius: 8px;
+
+            background: #ffffff;
+            color: var(--ink);
+
+            font-size: 15px;
+            outline: none;
+
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(22, 131, 59, 0.12);
+        }
+
+        input::placeholder {
+            color: #9aa49d;
+        }
+
+        /* =========================
+           LOGIN
+        ========================= */
+
+        .login-page {
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 25px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 430px;
+
+            background: #ffffff;
+
+            padding: 35px;
+
+            border: 1px solid var(--line);
+            border-radius: 15px;
+
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .login-box h1 {
+            font-size: 27px;
+            margin-bottom: 10px;
+            color: var(--ink);
+        }
+
+        .login-box > p {
+            margin-bottom: 25px;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* BOTÃO DE LOGIN */
+
+        .login-box .button,
+        .login-box .btn,
+        .login-box button {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           LINKS DO LOGIN
+        ========================= */
+
+        .login-links {
+            display: flex;
+            flex-direction: column;
+
+            gap: 12px;
+
+            margin-top: 20px;
+
+            text-align: center;
+        }
+
+        .login-links a {
+            font-size: 14px;
+        }
+
+        /* =========================
+           MENSAGENS
+        ========================= */
+
+        #loginMsg {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        /* =========================
+           AVISOS
+        ========================= */
+
+        .notice {
+            padding: 14px;
+
+            margin-top: 22px;
+
+            border-radius: 8px;
+
+            background: var(--green-light);
+            border: 1px solid #d2ead8;
+
+            color: #285438;
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .notice strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .notice p {
+            margin-top: 4px;
+        }
+
+        .notice.warn {
+            background: #fff7e8;
+            border-color: #f5dfb5;
+            color: #8a5708;
+        }
+
+        /* =========================
+           RODAPÉ
+        ========================= */
+
+        .footer-note {
+            text-align: center;
+
+            margin-top: 22px;
+
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           RESPONSIVIDADE
+        ========================= */
+
+        @media (max-width: 650px) {
+
+            .login-page {
+                padding: 15px;
+            }
+
+            .login-box {
+                padding: 25px 20px;
+            }
+
+            .login-box h1 {
+                font-size: 23px;
+            }
+        }
+
+        /* =========================
+           ANIMAÇÃO
+        ========================= */
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-box {
+            animation: aparecer 0.35s ease;
+        }
+
+    </style>
 </head>
 
 <body data-page="login">
+
+    <!-- =========================
+         PÁGINA DE LOGIN
+    ========================= -->
 
     <main class="login-page">
 
         <section class="login-box">
 
-            <h1>Sistema de Registro de Solicitações</h1>
+            <h1>Acesso institucional</h1>
 
-            <p class="subtitle">
-                Acesso único institucional para secretaria e gestão.
+            <p class="muted">
+                Entre com suas credenciais para acessar o sistema.
             </p>
+
+            <!-- FORMULÁRIO -->
 
             <form id="loginForm">
 
-                <!-- Campo de e-mail -->
+                <!-- E-MAIL -->
+
                 <div class="field">
-                    <label for="email">E-mail institucional</label>
+
+                    <label for="email">
+                        E-mail institucional
+                    </label>
 
                     <input
-                        id="email"
                         type="email"
-                        placeholder="Digite o e-mail institucional"
+                        id="email"
+                        placeholder="Digite seu e-mail"
+                        autocomplete="username"
                         required
                     >
+
                 </div>
 
-                <!-- Campo de senha -->
+                <!-- SENHA -->
+
                 <div class="field">
-                    <label for="senha">Senha</label>
+
+                    <label for="senha">
+                        Senha
+                    </label>
 
                     <input
-                        id="senha"
                         type="password"
+                        id="senha"
                         placeholder="Digite sua senha"
+                        autocomplete="current-password"
                         required
                     >
+
                 </div>
 
-                <!-- Seleção de área -->
+                <!-- SETOR -->
+
                 <div class="field">
-                    <label for="setor">Área de trabalho</label>
 
-                    <select id="setor">
-                        <option>Secretaria</option>
-                        <option>Gestão</option>
+                    <label for="setor">
+                        Setor
+                    </label>
+
+                    <select id="setor" required>
+
+                        <option value="">
+                            Selecione seu setor
+                        </option>
+
+                        <option value="Secretaria">
+                            Secretaria
+                        </option>
+
+                        <option value="Gestão">
+                            Gestão
+                        </option>
+
                     </select>
+
                 </div>
 
-                <!-- Botão de acesso -->
-                <a id="button" href="painel.html">
-                    Entrar no sistema
-                </a>
+                <!-- BOTÃO CORRETAMENTE INSERIDO -->
 
-                <!-- Mensagem de retorno -->
-                <p
-                    id="loginMsg"
-                    class="muted"
-                    style="margin-top: 12px; color: #b9382c;"
-                ></p>
+                <button
+                    type="submit"
+                    class="button"
+                    id="button"
+                >
+                    Entrar no sistema
+                </button>
+
+                <!-- MENSAGEM DO JAVASCRIPT -->
+
+                <p id="loginMsg"></p>
 
             </form>
 
-            <!-- Links auxiliares -->
+            <!-- LINKS -->
+
             <div class="login-links">
 
                 <a href="#" id="recovery">
@@ -81,35 +433,31 @@
                 </a>
 
                 <a href="registro.html">
-                    Criar conta institucional
+                    Criar cadastro institucional
                 </a>
 
             </div>
 
-            <!-- Informações de demonstração -->
+            <!-- CONTA DE DEMONSTRAÇÃO -->
+
             <div class="notice">
 
-                <strong>Acesso demonstrativo</strong>
+                <strong>Conta de demonstração</strong>
 
-                <br>
+                <p>
+                    E-mail: secretaria@escola.com
+                </p>
 
-                E-mail: secretaria@escola.com
-
-                <br>
-
-                Senha: Escola123!
-
-                <br>
-
-                Escolha Secretaria ou Gestão para testar as áreas.
+                <p>
+                    Senha: Escola123!
+                </p>
 
             </div>
 
-            <!-- Aviso sobre o protótipo -->
+            <!-- RODAPÉ -->
+
             <p class="footer-note">
-                Protótipo acadêmico: a autenticação demonstrativa
-                usa armazenamento local do navegador. Para uso real,
-                é necessário servidor e banco de dados seguros.
+                Sistema de registro de solicitações
             </p>
 
         </section>
@@ -118,464 +466,7 @@
 
 </body>
 </html>
-
-<style>
-    
-/* ==========================================
-   1. VARIÁVEIS GLOBAIS
-========================================== */
-
-:root {
-    --green: #16833b;
-    --green-dark: #10652d;
-    --green-light: #eaf6ee;
-
-    --ink: #24312a;
-    --muted: #6b776f;
-
-    --line: #e4ebe6;
-    --bg: #f5f8f6;
-
-    --red: #c0392b;
-    --orange: #d97706;
-    --blue: #2563eb;
-}
-
-
-/* ==========================================
-   2. RESET E CONFIGURAÇÕES GERAIS
-========================================== */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-}
-
-a {
-    color: var(--green);
-    text-decoration: none;
-}
-
-
-/* ==========================================
-   3. BOTÕES
-========================================== */
-
-.button {
-    border: 0;
-    border-radius: 8px;
-    padding: 11px 15px;
-
-    background: var(--green);
-    color: #fff;
-
-    font-weight: 600;
-    cursor: pointer;
-
-    display: inline-block;
-    text-align: center;
-}
-
-.button:hover {
-    background: var(--green-dark);
-}
-
-/* Botão secundário */
-.btn.secondary,
-button.secondary {
-    background: #e8efea;
-    color: #285438;
-}
-
-/* Botão de perigo */
-.btn.danger,
-button.danger {
-    background: #b9382c;
-}
-
-/* Botão de aviso */
-.btn.warning,
-button.warning {
-    background: #d97706;
-}
-
-/* Botão pequeno */
-.btn.small,
-button.small {
-    padding: 7px 10px;
-    font-size: 13px;
-}
-
-
-/* ==========================================
-   4. CABEÇALHO
-========================================== */
-
-header.top {
-    background: #fff;
-    border-bottom: 1px solid var(--line);
-
-    padding: 17px 4%;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    gap: 15px;
-}
-
-.brand {
-    font-size: 20px;
-    color: var(--green);
-    font-weight: 700;
-}
-
-.top-right {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-
-    color: var(--muted);
-    font-size: 13px;
-}
-
-
-/* ==========================================
-   5. ESTRUTURA PRINCIPAL
-========================================== */
-
-.layout {
-    display: grid;
-    grid-template-columns: 235px 1fr;
-
-    min-height: calc(100vh - 65px);
-}
-
-
-/* ==========================================
-   6. BARRA LATERAL
-========================================== */
-
-.sidebar {
-    background: #fff;
-    border-right: 1px solid var(--line);
-
-    padding: 22px 14px;
-}
-
-.sidebar .section-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-
-    color: #89958d;
-
-    margin: 8px 10px 12px;
-}
-
-.sidebar a {
-    display: block;
-
-    padding: 11px 12px;
-    border-radius: 8px;
-
-    color: #405047;
-
-    margin: 3px 0;
-    font-size: 14px;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-    background: var(--green-light);
-    color: var(--green);
-    font-weight: 700;
-}
-
-
-/* ==========================================
-   7. ÁREA DE CONTEÚDO
-========================================== */
-
-.content {
-    padding: 28px;
-
-    max-width: 1400px;
-    width: 100%;
-
-    margin: auto;
-}
-
-
-/* ==========================================
-   8. TÍTULOS E TEXTOS
-========================================== */
-
-h1 {
-    font-size: 26px;
-    margin-bottom: 8px;
-    color: #203b2a;
-}
-
-h2 {
-    font-size: 18px;
-    margin-bottom: 14px;
-}
-
-.subtitle {
-    color: var(--muted);
-    margin-bottom: 24px;
-    line-height: 1.5;
-}
-
-.muted {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-
-/* ==========================================
-   9. CARDS
-========================================== */
-
-.card {
-    background: #fff;
-
-    border: 1px solid var(--line);
-    border-radius: 12px;
-
-    padding: 20px;
-
-    box-shadow: 0 3px 12px #153b2010;
-}
-
-
-/* ==========================================
-   10. GRID E ESTATÍSTICAS
-========================================== */
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.stat {
-    font-size: 30px;
-    font-weight: 700;
-
-    color: var(--green);
-
-    margin: 8px 0;
-}
-
-.stat-label {
-    font-size: 13px;
-    color: var(--muted);
-}
-
-.cards-2 {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    gap: 16px;
-}
-
-.actions {
-    display: flex;
-    gap: 10px;
-
-    flex-wrap: wrap;
-    margin: 14px 0;
-}
-
-
-/* ==========================================
-   11. FORMULÁRIOS
-========================================== */
-
-form {
-    display: grid;
-    gap: 10px;
-}
-
-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #405047;
-}
-
-input,
-select,
-textarea {
-    width: 100%;
-
-    padding: 12px;
-
-    border: 1px solid #cfd9d2;
-    border-radius: 8px;
-
-    background: #fff;
-
-    font-size: 14px;
-    color: var(--ink);
-}
-
-textarea {
-    min-height: 105px;
-    resize: vertical;
-}
-
-/* Efeito ao selecionar um campo */
-input:focus,
-select:focus,
-textarea:focus {
-    outline: 2px solid #b6dfc3;
-    border-color: var(--green);
-}
-
-.field {
-    margin-bottom: 8px;
-}
-
-/* Formulário com duas colunas */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    gap: 12px;
-}
-
-
-/* ==========================================
-   12. TABELAS
-========================================== */
-
-.table-wrap {
-    overflow-x: auto;
-
-    background: #fff;
-
-    border: 1px solid var(--line);
-    border-radius: 10px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    min-width: 650px;
-}
-
-th,
-td {
-    text-align: left;
-
-    padding: 12px;
-
-    border-bottom: 1px solid var(--line);
-
-    font-size: 13px;
-    vertical-align: top;
-}
-
-th {
-    background: #f2f7f3;
-    color: #405047;
-}
-
-tr:last-child td {
-    border-bottom: 0;
-}
-
-
-/* ==========================================
-   13. BADGES E STATUS
-========================================== */
-
-.badge {
-    display: inline-block;
-
-    border-radius: 20px;
-    padding: 5px 9px;
-
-    font-size: 11px;
-    font-weight: 700;
-
-    background: #e8efea;
-    color: #405047;
-}
-
-/* Status urgente e alta */
-.badge.urgente,
-.badge.alta {
-    background: #fde8e6;
-    color: #a12c22;
-}
-
-/* Status médio */
-.badge.media {
-    background: #fff1d6;
-    color: #965b00;
-}
-
-/* Status baixo e resolvido */
-.badge.baixa,
-.badge.resolvida {
-    background: #e5f5e9;
-    color: #176b35;
-}
-
-/* Status em andamento */
-.badge.em-andamento {
-    background: #e6efff;
-    color: #2457a6;
-}
-
-/* Status pendente */
-.badge.pendente {
-    background: #fff1d6;
-    color: #965b00;
-}
-
-
-/* ==========================================
-   14. AVISOS
-========================================== */
-
-.notice {
-    padding: 13px 15px;
-
-    border-radius: 8px;
-
-    background: #edf6ef;
-    border-left: 4px solid var(--green);
-
-    color: #385443;
-
-    font-size: 13px;
-    line-height: 1.5;
-
-    margin: 14px 0;
-}
-
-/* Aviso de atenção */
-.notice.warn {
-    background: #fff7e8;
-    border-color: var(--orange);
-    color: #80500b;
+80500b;
 }
 
 
