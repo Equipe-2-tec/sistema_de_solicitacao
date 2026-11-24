@@ -14,11 +14,11 @@ def home():
 @app.route('/index.html')
 @app.route('/login')
 def pagina_index():
-    return render_template('index.html')
+    return render_template('index2.html')
 
 @app.route('/bolsa')
-def pagina_bolsa():
-    return render_template('Bolsa de dados.html')
+def cadastro():
+    return render_template('cadastro.html')
 
 
 @app.route('/cadastro', methods=['POST'])
