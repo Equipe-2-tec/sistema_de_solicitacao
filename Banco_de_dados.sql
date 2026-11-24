@@ -1,3 +1,4 @@
+-- Active: 1795525850498@@127.0.0.1@3306@mysql
 CREATE DATABASE IF NOT EXISTS sistema_solicitacoes
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
