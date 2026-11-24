@@ -8,3 +8,6 @@ def conectar():
         password="1234",
         database="sistema_solicitacoes"
     )
+
+def criar_tabela():
+    pass
