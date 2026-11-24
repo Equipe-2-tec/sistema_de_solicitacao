@@ -1,2 +1,4 @@
 mysql-connector-python
 Flask
+banco import
+werkzeug.security
