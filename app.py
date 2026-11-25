@@ -1,16 +1,20 @@
-
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
 
 app = Flask(__name__)
 
-criar_tabela()
+
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        "status": "online",
+        "mensagem": "API funcionando. Envie uma requisição POST para /cadastro"
+    }), 200
 
 
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
-
     dados = request.get_json(silent=True) or {}
 
     nome = dados.get('nome')
@@ -27,10 +31,15 @@ def cadastro():
             "erro": "A senha deve ter pelo menos 8 caracteres"
         }), 400
 
-    conexao = conectar()
-    cursor = conexao.cursor()
+    conexao = None
+    cursor = None
 
     try:
+        criar_tabela()
+
+        conexao = conectar()
+        cursor = conexao.cursor()
+
         senha_hash = generate_password_hash(senha)
 
         cursor.execute("""
@@ -53,16 +62,20 @@ def cadastro():
             "informacao": "Aguarde a validação institucional para acessar o sistema."
         }), 201
 
-    except Exception:
-        conexao.rollback()
+    except Exception as e:
+        if conexao:
+            conexao.rollback()
 
         return jsonify({
-            "erro": "Não foi possível realizar o cadastro. Verifique se o e-mail já está cadastrado."
+            "erro": "Não foi possível realizar o cadastro. Verifique se o e-mail já está cadastrado.",
+            "detalhe_tecnico": str(e)
         }), 400
 
     finally:
-        cursor.close()
-        conexao.close()
+        if cursor:
+            cursor.close()
+        if conexao:
+            conexao.close()
 
 
 if __name__ == '__main__':
