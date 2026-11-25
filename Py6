@@ -1,0 +1,3 @@
+from painel import painel
+
+app.register_blueprint(painel)
