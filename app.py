@@ -3,18 +3,22 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
 
 app = Flask(__name__, template_folder='front_end', static_folder='static')
 
+
+# Página inicial do site (carrega o index2.html)
 @app.route('/', methods=['GET'])
 def home():
-    return render_template('index.html')
-    
-@app.route('/', methods=['GET'])
-def home():
+    return render_template('index2.html')
+
+
+# Rota de verificação do status da API e do banco MySQL (acesse /status se quiser conferir)
+@app.route('/status', methods=['GET'])
+def status_api():
     banco_configurado = bool(os.environ.get("MYSQL_HOST"))
     return jsonify({
         "status": "online",
@@ -23,6 +27,21 @@ def home():
     }), 200
 
 
+# Carrega qualquer outra página HTML dentro de front_end (ex: /registro.html, /painel.html)
+@app.route('/<pagina>.html', methods=['GET'])
+def abrir_pagina(pagina):
+    return render_template(f'{pagina}.html')
+
+
+# Entrega o style.css, Script.js e imagens que estão dentro de front_end
+@app.route('/<arquivo>.<ext>', methods=['GET'])
+def arquivos_frontend(arquivo, ext):
+    if ext in ['css', 'js', 'png', 'jpg', 'jpeg', 'svg', 'ico']:
+        return send_from_directory('front_end', f'{arquivo}.{ext}')
+    return jsonify({"erro": "Arquivo não encontrado"}), 404
+
+
+# Rota para salvar novos cadastros no MySQL
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
     dados = request.get_json(silent=True) or {}
