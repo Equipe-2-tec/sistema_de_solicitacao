@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, request, jsonify
 from werkzeug.security import generate_password_hash
 from banco import conectar, criar_tabela
@@ -7,9 +12,11 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def home():
+    banco_configurado = bool(os.environ.get("MYSQL_HOST"))
     return jsonify({
         "status": "online",
-        "mensagem": "API funcionando. Envie uma requisição POST para /cadastro"
+        "mysql_configurado": banco_configurado,
+        "mensagem": "API funcionando. Envie POST para /cadastro"
     }), 200
 
 
@@ -22,14 +29,10 @@ def cadastro():
     senha = dados.get('senha')
 
     if not nome or not email or not senha:
-        return jsonify({
-            "erro": "Preencha todos os campos"
-        }), 400
+        return jsonify({"erro": "Preencha todos os campos"}), 400
 
     if len(senha) < 8:
-        return jsonify({
-            "erro": "A senha deve ter pelo menos 8 caracteres"
-        }), 400
+        return jsonify({"erro": "A senha deve ter pelo menos 8 caracteres"}), 400
 
     conexao = None
     cursor = None
@@ -39,7 +42,6 @@ def cadastro():
 
         conexao = conectar()
         cursor = conexao.cursor()
-
         senha_hash = generate_password_hash(senha)
 
         cursor.execute("""
@@ -67,8 +69,8 @@ def cadastro():
             conexao.rollback()
 
         return jsonify({
-            "erro": "Não foi possível realizar o cadastro. Verifique se o e-mail já está cadastrado.",
-            "detalhe_tecnico": str(e)
+            "erro": "Não foi possível realizar o cadastro.",
+            "detalhe": str(e)
         }), 400
 
     finally:
