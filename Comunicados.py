@@ -172,3 +172,5 @@ def arquivar_comunicado(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+[tool.vercel]
+entrypoint = "Comunicados:app"
