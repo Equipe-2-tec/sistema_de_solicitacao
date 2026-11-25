@@ -681,6 +681,3 @@ function renderHistory() {
         </tr>
     `).join('') || '<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';
 }
-
-// COMUNICADOS
-function renderNot
