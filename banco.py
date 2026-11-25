@@ -1,0 +1,9 @@
+
+CREATE TABLE IF NOT EXISTS contas_institucionais (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    ativo BOOLEAN DEFAULT FALSE,
+    status VARCHAR(30) DEFAULT 'Pendente'
+);
