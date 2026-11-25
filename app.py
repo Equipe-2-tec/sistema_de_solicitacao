@@ -9,22 +9,22 @@ criar_tabela()
 @app.route('/')
 @app.route('/Tela_inicial.html')
 def home():
-    return render_template('Tela_inicial.html')
+    return render_Front-end('Tela_inicial.html')
 
 @app.route('/index2.html')
 @app.route('/login')
 def pagina_index():
-    return render_template('index2.html')
+    return render_Front-end('index2.html')
 
 @app.route('/registro.html')
 @app.route('/cadastro')
 def cadastrar():
-    return render_template('registro.html')
+    return render_Front-end('registro.html')
 
 @app.route('/painel.html')
 @app.route('/painel')
 def painel():
-    return render_template('painel.html')
+    return render_Front-end('painel.html')
 
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
