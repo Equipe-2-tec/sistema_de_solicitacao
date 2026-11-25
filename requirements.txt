@@ -4,4 +4,3 @@ werkzeug
 gunicorn
 mysql-connector-python
 Werkzeug
-tor-python
