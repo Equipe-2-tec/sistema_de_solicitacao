@@ -1,13 +1,16 @@
 
-const DB={account:'srsi_account',occ:'srsi_occurrences',logs:'srsi_logs',notices:'srsi_notices',sector:'srsi_sector'};
+const DB={accounts:'srsi_accounts',legacyAccount:'srsi_account',occ:'srsi_occurrences',logs:'srsi_logs',notices:'srsi_notices',sector:'srsi_sector'};
+const MAX_ACCOUNTS=3;
+function allAccounts(){let list=get(DB.accounts,null);if(Array.isArray(list))return list;const old=get(DB.legacyAccount,null);list=old?[old]:[];set(DB.accounts,list);return list;}
+function saveAccounts(list){set(DB.accounts,list)}
 const get=(k,def=[])=>{try{return JSON.parse(localStorage.getItem(k))??def}catch{return def}};
 const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateFmt=d=>new Date(d).toLocaleString('pt-BR');
 function logAction(sector,action){let logs=get(DB.logs);logs.unshift({date:new Date().toISOString(),sector,action});set(DB.logs,logs.slice(0,300))}
-function account(){return get(DB.account,null)}
+function account(){const email=(sessionStorage.getItem('srsi_logged_email')||'').toLowerCase();return allAccounts().find(a=>a.email.toLowerCase()===email)||null}
 function requireLogin(){if(!account()||!sessionStorage.getItem('srsi_logged')){location.href='index2.html';return false}return true}
-function logout(){sessionStorage.removeItem('srsi_logged');location.href='index2.html'}
+function logout(){sessionStorage.removeItem('srsi_logged');sessionStorage.removeItem('srsi_logged_email');location.href='index2.html'}
 function init(){
  const page=location.pathname.split('/').pop();
  if(page==='index2.html'||page===''){
@@ -16,21 +19,36 @@ function init(){
   const fill=document.getElementById('fillDemo');
   if(fill)fill.addEventListener('click',()=>{f.email.value=demoEmail;f.senha.value=demoPassword;document.getElementById('loginMsg').textContent='Dados de demonstração preenchidos. Clique em Entrar no sistema.'});
   if(f)f.addEventListener('submit',e=>{
-   e.preventDefault();let a=account();const msg=document.getElementById('loginMsg');
+   e.preventDefault();const msg=document.getElementById('loginMsg');
    const enteredEmail=f.email.value.trim().toLowerCase(),enteredPassword=f.senha.value;
+   let list=allAccounts(),a=list.find(x=>x.email.toLowerCase()===enteredEmail);
    if(!a&&enteredEmail===demoEmail&&enteredPassword===demoPassword){
+    if(list.length>=MAX_ACCOUNTS){msg.textContent='O limite de 3 contas já foi atingido. Use uma das contas cadastradas.';return}
     a={school:'Escola de Demonstração',email:demoEmail,owner:'Usuário de teste',password:demoPassword,status:'aprovada',created:new Date().toISOString(),demo:true};
-    set(DB.account,a);logAction('Sistema','Conta fictícia de demonstração criada');
+    list.push(a);saveAccounts(list);logAction('Sistema','Conta fictícia de demonstração criada');
    }
-   if(!a){msg.textContent='Nenhuma conta institucional cadastrada. Faça a configuração inicial ou use os dados de demonstração.';return}
+   if(!a){msg.textContent='E-mail não cadastrado. Faça o cadastro institucional ou confira os dados.';return}
    if(a.status!=='aprovada'){msg.textContent='Cadastro aguardando validação institucional. O acesso ainda não foi liberado.';return}
-   if(enteredEmail===a.email.toLowerCase()&&enteredPassword===a.password){sessionStorage.setItem('srsi_logged','1');logAction('Acesso institucional','Login realizado');location.href='painel.html'}
-   else msg.textContent='E-mail ou senha incorretos. Se já cadastrou uma instituição, use as credenciais dela.'
+   if(enteredPassword===a.password){sessionStorage.setItem('srsi_logged','1');sessionStorage.setItem('srsi_logged_email',a.email);logAction('Acesso institucional',`Login realizado: ${a.email}`);location.href='painel.html'}
+   else msg.textContent='Senha incorreta. Confira a senha e tente novamente.';
   });
  }
- if(page==='registro.html'){const f=document.getElementById('registerForm');f?.addEventListener('submit',e=>{e.preventDefault();const msg=document.getElementById('registerMsg');if(account()){msg.textContent='Já existe uma conta institucional neste navegador. O sistema permite uma única conta.';return}if(f.regPass.value!==f.regConfirm.value){msg.textContent='As senhas não correspondem.';return}if(f.regPass.value.length<8){msg.textContent='A senha precisa ter pelo menos 8 caracteres.';return}set(DB.account,{school:f.school.value.trim(),email:f.regEmail.value.trim(),owner:f.owner.value.trim(),password:f.regPass.value,status:'pendente',created:new Date().toISOString()});msg.innerHTML='Cadastro enviado para validação institucional. Para testar o protótipo, <a href="validar-demo.html">abra a tela de simulação de validação</a>. Em uso real, somente a instituição autorizada poderá aprovar o cadastro.';logAction('Configuração inicial','Cadastro institucional enviado para validação')})}
- if(page==='recuperar.html'){document.getElementById('recoverForm')?.addEventListener('submit',e=>{e.preventDefault();const a=account();document.getElementById('recoverMsg').textContent=a&&a.email.toLowerCase()===recoverEmail.value.trim().toLowerCase()?'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.':'Não foi encontrado cadastro com esse e-mail neste navegador.'})}
- if(page==='painel.html'){if(!requireLogin())return;const a=account(),o=get(DB.occ);schoolTitle.textContent=(a?.school||'Instituição')+' • Visão geral';total.textContent=o.length;pending.textContent=o.filter(x=>['Recebida','Em análise'].includes(x.status)).length;progress.textContent=o.filter(x=>x.status==='Em andamento').length;done.textContent=o.filter(x=>x.status==='Resolvida').length;const rows=get(DB.logs).slice(0,12);activityRows.innerHTML=rows.map(x=>`<tr><td>${dateFmt(x.date)}</td><td>${esc(x.sector)}</td><td>${esc(x.action)}</td></tr>`).join('')||'<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';const ac=account();validationStatus.textContent='Status do cadastro: '+(ac?.status||'não cadastrado');approveDemo.onclick=()=>{if(!ac)return;ac.status='aprovada';set(DB.account,ac);validationStatus.textContent='Status do cadastro: aprovada (simulação)';logAction('Validação institucional','Validação simulada para fins de demonstração')}}
+ if(page==='registro.html'){
+  const f=document.getElementById('registerForm');
+  f?.addEventListener('submit',e=>{
+   e.preventDefault();const msg=document.getElementById('registerMsg');let list=allAccounts();
+   if(list.length>=MAX_ACCOUNTS){msg.textContent='Limite atingido: o sistema permite no máximo 3 contas. Não é possível cadastrar uma quarta conta.';return}
+   const email=f.regEmail.value.trim().toLowerCase();
+   if(list.some(a=>a.email.toLowerCase()===email)){msg.textContent='Este e-mail já está cadastrado. Utilize outro e-mail.';return}
+   if(f.regPass.value!==f.regConfirm.value){msg.textContent='As senhas não correspondem.';return}
+   if(f.regPass.value.length<8){msg.textContent='A senha precisa ter pelo menos 8 caracteres.';return}
+   list.push({school:f.school.value.trim(),email,owner:f.owner.value.trim(),password:f.regPass.value,status:'pendente',created:new Date().toISOString()});saveAccounts(list);
+   msg.innerHTML='Cadastro enviado para validação institucional. <a href="validar-demo.html">Abra a tela de simulação de validação</a>. Contas cadastradas: '+list.length+' de '+MAX_ACCOUNTS+'.';
+   logAction('Configuração inicial',`Cadastro institucional enviado para validação: ${email}`);
+  });
+ }
+ if(page==='recuperar.html'){document.getElementById('recoverForm')?.addEventListener('submit',e=>{e.preventDefault();const a=allAccounts().find(x=>x.email.toLowerCase()===recoverEmail.value.trim().toLowerCase());document.getElementById('recoverMsg').textContent=a?'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.':'Não foi encontrado cadastro com esse e-mail neste navegador.'})}
+ if(page==='painel.html'){if(!requireLogin())return;const a=account(),o=get(DB.occ);schoolTitle.textContent=(a?.school||'Instituição')+' • Visão geral';total.textContent=o.length;pending.textContent=o.filter(x=>['Recebida','Em análise'].includes(x.status)).length;progress.textContent=o.filter(x=>x.status==='Em andamento').length;done.textContent=o.filter(x=>x.status==='Resolvida').length;const rows=get(DB.logs).slice(0,12);activityRows.innerHTML=rows.map(x=>`<tr><td>${dateFmt(x.date)}</td><td>${esc(x.sector)}</td><td>${esc(x.action)}</td></tr>`).join('')||'<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';const ac=account();validationStatus.textContent='Status do cadastro: '+(ac?.status||'não cadastrado');approveDemo.onclick=()=>{if(!ac)return;ac.status='aprovada';saveAccounts(allAccounts().map(x=>x.email===ac.email?ac:x));validationStatus.textContent='Status do cadastro: aprovada (simulação)';logAction('Validação institucional','Validação simulada para fins de demonstração')}}
  if(page==='ocorrencias.html'){if(!requireLogin())return;renderOccurrenceTable();occurrenceForm.addEventListener('submit',e=>{e.preventDefault();const files=[...attachments.files].map(f=>f.name);const item={id:'OCO-'+Date.now().toString(36).toUpperCase(),location:location.value,category:category.value,title:title.value.trim(),description:description.value.trim(),files,created:new Date().toISOString(),priority:'Não definida',status:'Recebida',actions:[],history:[]};let arr=get(DB.occ);arr.unshift(item);set(DB.occ,arr);logAction('Secretaria',`Registrou e encaminhou a ocorrência ${item.id} (${item.location})`);occurrenceMsg.textContent='Ocorrência registrada! Protocolo: '+item.id;occurrenceForm.reset();renderOccurrenceTable()})}
  if(page==='mapa.html'){if(!requireLogin())return;renderMap();document.querySelectorAll('.room').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.room').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');showRoom(b.dataset.room)}))}
  if(page==='gestao.html'){if(!requireLogin())return;['manageSearch','priorityFilter','statusFilter','categoryFilter'].forEach(id=>document.getElementById(id).addEventListener('input',renderManage));renderManage()}
