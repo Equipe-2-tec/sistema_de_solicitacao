@@ -1,13 +1,19 @@
+import os
 import mysql.connector
 
 
-def criar_tabelas():
-    conexao = mysql.connector.connect(
-        host="localhost",
-        user="seu_usuario",
-        password="sua_senha",
-        database="seu_banco",
+def conectar():
+    return mysql.connector.connect(
+        host=os.environ.get("MYSQL_HOST"),
+        port=int(os.environ.get("MYSQL_PORT", 3306)),
+        user=os.environ.get("MYSQL_USER"),
+        password=os.environ.get("MYSQL_PASSWORD"),
+        database=os.environ.get("MYSQL_DATABASE"),
     )
+
+
+def criar_tabela():
+    conexao = conectar()
     cursor = conexao.cursor()
 
     sql = """
@@ -28,4 +34,4 @@ def criar_tabelas():
 
 
 if __name__ == "__main__":
-    criar_tabelas()
+    criar_tabela()
