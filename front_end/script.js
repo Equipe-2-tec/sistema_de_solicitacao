@@ -816,9 +816,12 @@ function archiveNotice(id) {
   let n = get(DB.notices);
   let x = n.find(v => v.id === id);
 
-  if (x) {
+  if (x)  { 
     x.archived = true;
 
     set(DB.notices, n);
 
-    logAction('Gestão', 'Arquivou comunicado:
+    logAction ('Gestão', 'Arquivou comunicado:') 
+    
+     }
+      }
