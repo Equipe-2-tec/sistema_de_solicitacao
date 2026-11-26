@@ -1,9 +1,7 @@
 import os
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, abort, request, jsonify, render_template, send_from_directory
+from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
 
 try:
@@ -17,7 +15,7 @@ except Exception as e:
 app = Flask(__name__, template_folder='front_end', static_folder='static')
 
 
-# ===== Rotas de páginas (usadas apenas no desenvolvimento local) =====
+# ===== Páginas e arquivos estáticos =====
 @app.route('/', methods=['GET'])
 def home():
     return render_template('index2.html')
@@ -25,13 +23,16 @@ def home():
 
 @app.route('/<pagina>.html', methods=['GET'])
 def abrir_pagina(pagina):
-    return render_template(f'{pagina}.html')
+    try:
+        return render_template(f'{pagina}.html')
+    except TemplateNotFound:
+        abort(404)
 
 
 @app.route('/<arquivo>.<ext>', methods=['GET'])
 def arquivos_frontend(arquivo, ext):
     if ext in ['css', 'js', 'png', 'jpg', 'jpeg', 'svg', 'ico']:
-        return send_from_directory('front_end', f'{arquivo}.{ext}')
+        return send_from_directory(os.path.join(app.root_path, 'public'), f'{arquivo}.{ext}')
     return jsonify({"erro": "Arquivo não encontrado"}), 404
 
 

@@ -1,8 +1,8 @@
 SISTEMA DE REGISTRO DE SOLICITAÇÕES - PROTÓTIPO
 
 Como abrir:
-1. Extraia todos os arquivos do ZIP para uma mesma pasta.
-2. Abra index2.html no navegador.
+1. Execute o Flask conforme o README.md na raiz do projeto.
+2. Abra http://127.0.0.1:5000 no navegador.
 3. Para entrar rapidamente, use o acesso fictício na página inicial:
    E-mail: teste.escola@gmail.com
    Senha: Escola12345
@@ -22,11 +22,11 @@ ocorrencias.html  Registro de problemas e anexos (nomes dos arquivos)
 gestao.html       Prioridade, situação, providências e histórico
 relatorios.html   Filtros, CSV e impressão/Salvar como PDF
 comunicados.html  Publicar, editar e arquivar comunicados
-style.css         Identidade visual
-script.js         Funcionalidades compartilhadas
+public/style.css  Identidade visual
+public/script.js  Funcionalidades compartilhadas
 
 LIMITAÇÕES IMPORTANTES:
-Este é um protótipo front-end para apresentação acadêmica. Não possui backend.
+Este é um protótipo acadêmico. A API Flask pode gravar cadastros no MySQL.
 A validação institucional, autenticação segura, envio real de e-mails, armazenamento de arquivos,
 permissões verificadas no servidor e sincronização entre dispositivos precisam ser implementados
 em um backend. Não use dados reais ou senhas importantes neste protótipo. O e-mail teste.escola@gmail.com é fictício e não corresponde a uma caixa de entrada Gmail real.
