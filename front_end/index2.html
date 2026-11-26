@@ -64,8 +64,68 @@
 
   <footer>Protótipo acadêmico • Conta institucional única</footer>
 
-  <!-- Toda a lógica de login fica no script.js -->
   <script src="script.js"></script>
+
+  <script>
+    (function () {
+      const DEMO_EMAIL = "teste.escola@gmail.com";
+      const DEMO_PASS  = "Escola12345";
+
+      const loginForm = document.getElementById("loginForm");
+      const fillBtn   = document.getElementById("fillDemo");
+
+      if (fillBtn) {
+        fillBtn.addEventListener("click", function () {
+          document.getElementById("email").value = DEMO_EMAIL;
+          document.getElementById("senha").value = DEMO_PASS;
+        });
+      }
+
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const senha = document.getElementById("senha").value;
+        const msg   = document.getElementById("loginMsg");
+
+        msg.textContent = "";
+
+        let contaValida = false;
+
+        // 1) Conta já cadastrada no navegador (salva por registro.html)
+        const salva = localStorage.getItem("institutionAccount");
+        if (salva) {
+          try {
+            const acc = JSON.parse(salva);
+            if (acc.email === email && acc.password === senha) {
+              contaValida = true;
+            }
+          } catch (e) {
+            // JSON corrompido: ignora
+          }
+        }
+
+        // 2) Conta de demonstração
+        if (!contaValida && email === DEMO_EMAIL && senha === DEMO_PASS) {
+          localStorage.setItem("institutionAccount", JSON.stringify({
+            school: "Escola de Demonstração",
+            email: DEMO_EMAIL,
+            owner: "Responsável Demo",
+            password: DEMO_PASS
+          }));
+          contaValida = true;
+        }
+
+        if (!contaValida) {
+          msg.textContent = "E-mail ou senha incorretos. Verifique ou crie uma conta.";
+          return;
+        }
+
+        localStorage.setItem("institutionLoggedIn", "true");
+        window.location.href = "painel.html";
+      });
+    })();
+  </script>
 
 </body>
 </html>
