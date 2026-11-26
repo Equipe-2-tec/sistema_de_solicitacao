@@ -89,9 +89,20 @@ function account() {
   ) || null;
 }
 
+// VERIFICAÇÃO DE LOGIN CORRIGIDA
 function requireLogin() {
-  if (!account() || !sessionStorage.getItem('srsi_logged')) {
-    location.href = 'index2.html';
+  const logged = sessionStorage.getItem('srsi_logged');
+  const email = sessionStorage.getItem('srsi_logged_email');
+
+  const a = allAccounts().find(
+    x => x.email.toLowerCase() === (email || '').toLowerCase()
+  );
+
+  if (logged !== '1' || !a || a.status !== 'aprovada') {
+    sessionStorage.removeItem('srsi_logged');
+    sessionStorage.removeItem('srsi_logged_email');
+
+    location.replace('index2.html');
     return false;
   }
 
@@ -107,6 +118,20 @@ function logout() {
 function init() {
   const page = location.pathname.split('/').pop();
 
+  // PÁGINAS PÚBLICAS E PROTEÇÃO DAS PÁGINAS INTERNAS
+  const publicPages = [
+    '',
+    'index.html',
+    'index2.html',
+    'registro.html',
+    'recuperar.html'
+  ];
+
+  if (!publicPages.includes(page)) {
+    if (!requireLogin()) return;
+  }
+
+  // LOGIN
   if (page === 'index2.html' || page === '') {
     const f = document.getElementById('loginForm');
 
@@ -115,7 +140,7 @@ function init() {
 
     const fill = document.getElementById('fillDemo');
 
-    if (fill) {
+    if (fill && f) {
       fill.addEventListener('click', () => {
         f.email.value = demoEmail;
         f.senha.value = demoPassword;
@@ -201,7 +226,7 @@ function init() {
     }
   }
 
-  
+  // CADASTRO
   if (page === 'registro.html') {
     const f = document.getElementById('registerForm');
 
@@ -265,24 +290,26 @@ function init() {
     });
   }
 
-    document.getElementById('recoverForm')?.addEventListener('submit', e => {
-      e.preventDefault();
+  // RECUPERAÇÃO DE SENHA
+  document.getElementById('recoverForm')?.addEventListener('submit', e => {
+    e.preventDefault();
 
-      const a = allAccounts().find(
-        x => x.email.toLowerCase() ===
-        recoverEmail.value.trim().toLowerCase()
-      );
+    const recoverEmail = document.getElementById('recoverEmail');
+    const recoverMsg = document.getElementById('recoverMsg');
 
-      document.getElementById('recoverMsg').textContent =
-        a
-          ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
-          : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
-    });
-  }
+    const a = allAccounts().find(
+      x => x.email.toLowerCase() ===
+      recoverEmail.value.trim().toLowerCase()
+    );
 
+    recoverMsg.textContent =
+      a
+        ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
+        : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
+  });
+
+  // PAINEL
   if (page === 'painel.html') {
-    if (!requireLogin()) return;
-
     const a = account();
     const o = get(DB.occ);
 
@@ -340,9 +367,8 @@ function init() {
     };
   }
 
+  // OCORRÊNCIAS
   if (page === 'ocorrencias.html') {
-    if (!requireLogin()) return;
-
     renderOccurrenceTable();
 
     occurrenceForm.addEventListener('submit', e => {
@@ -383,9 +409,8 @@ function init() {
     });
   }
 
+  // MAPA
   if (page === 'mapa.html') {
-    if (!requireLogin()) return;
-
     renderMap();
 
     document.querySelectorAll('.room').forEach(b =>
@@ -400,24 +425,22 @@ function init() {
     );
   }
 
+  // GESTÃO
   if (page === 'gestao.html') {
-    if (!requireLogin()) return;
-
     [
       'manageSearch',
       'priorityFilter',
       'statusFilter',
       'categoryFilter'
-    ].forEach(id =>
-      document.getElementById(id).addEventListener('input', renderManage)
-    );
+    ].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', renderManage);
+    });
 
     renderManage();
   }
 
+  // RELATÓRIOS
   if (page === 'relatorios.html') {
-    if (!requireLogin()) return;
-
     applyReport.onclick = renderReport;
     exportCsv.onclick = exportReport;
     printReport.onclick = () => window.print();
@@ -426,9 +449,8 @@ function init() {
     renderHistory();
   }
 
+  // COMUNICADOS
   if (page === 'comunicados.html') {
-    if (!requireLogin()) return;
-
     renderNotices();
 
     noticeForm.addEventListener('submit', e => {
@@ -455,8 +477,9 @@ function init() {
       renderNotices();
     });
   }
+}
 
-
+// TABELA DE OCORRÊNCIAS
 function renderOccurrenceTable() {
   const rows = get(DB.occ);
 
@@ -473,6 +496,7 @@ function renderOccurrenceTable() {
     '<tr><td colspan="5">Nenhuma ocorrência registrada.</td></tr>';
 }
 
+// MAPA
 function renderMap() {
   const open = get(DB.occ).filter(
     x => x.status !== 'Resolvida' && x.status !== 'Arquivada'
@@ -505,6 +529,7 @@ function showRoom(room) {
       : 'Nenhuma ocorrência registrada para este ambiente.';
 }
 
+// GESTÃO DE OCORRÊNCIAS
 function renderManage() {
   const q = (manageSearch.value || '').toLowerCase();
   const p = priorityFilter.value;
@@ -631,6 +656,8 @@ function showHistory(id) {
   const x = get(DB.occ).find(v => v.id === id);
   const el = document.getElementById('hist-' + id);
 
+  if (!el) return;
+
   el.innerHTML =
     (x?.history || []).map(h =>
       `<p>${dateFmt(h.date)} — ${esc(h.text)}</p>`
@@ -638,10 +665,13 @@ function showHistory(id) {
     'Sem atualizações ainda.';
 }
 
+// RELATÓRIOS
 function filteredReports() {
   let arr = get(DB.occ);
 
-  let period = periodEl.value;
+  const periodEl = document.getElementById('period');
+
+  let period = periodEl?.value || 'all';
   let loc = reportLocation.value;
   let cat = reportCategory.value;
   let st = reportStatus.value;
@@ -663,8 +693,6 @@ function filteredReports() {
     );
   });
 }
-
-const periodEl = document.getElementById('period');
 
 function renderReport() {
   if (!document.getElementById('reportRows')) return;
@@ -759,6 +787,7 @@ function renderHistory() {
     '<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';
 }
 
+// COMUNICADOS
 function renderNotices() {
   let n = get(DB.notices);
 
