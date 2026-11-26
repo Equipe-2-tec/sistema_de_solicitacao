@@ -1,18 +1,24 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/",                 "destination": "/front_end/index2.html" },
-    { "source": "/index2.html",      "destination": "/front_end/index2.html" },
-    { "source": "/registro.html",    "destination": "/front_end/registro.html" },
-    { "source": "/painel.html",      "destination": "/front_end/painel.html" },
-    { "source": "/mapa.html",        "destination": "/front_end/mapa.html" },
-    { "source": "/ocorrencias.html", "destination": "/front_end/ocorrencias.html" },
-    { "source": "/gestao.html",      "destination": "/front_end/gestao.html" },
-    { "source": "/relatorios.html",  "destination": "/front_end/relatorios.html" },
-    { "source": "/comunicados.html", "destination": "/front_end/comunicados.html" },
-    { "source": "/recuperar.html",   "destination": "/front_end/recuperar.html" },
-    { "source": "/style.css",        "destination": "/front_end/style.css" },
-    { "source": "/script.js",        "destination": "/front_end/script.js" },
-    { "source": "/api/(.*)",         "destination": "/api/index" }
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.py" },
+    { "src": "/", "dest": "/front_end/index2.html" },
+    { "src": "/index2.html", "dest": "/front_end/index2.html" },
+    { "src": "/registro.html", "dest": "/front_end/registro.html" },
+    { "src": "/painel.html", "dest": "/front_end/painel.html" },
+    { "src": "/mapa.html", "dest": "/front_end/mapa.html" },
+    { "src": "/ocorrencias.html", "dest": "/front_end/ocorrencias.html" },
+    { "src": "/gestao.html", "dest": "/front_end/gestao.html" },
+    { "src": "/relatorios.html", "dest": "/front_end/relatorios.html" },
+    { "src": "/comunicados.html", "dest": "/front_end/comunicados.html" },
+    { "src": "/recuperar.html", "dest": "/front_end/recuperar.html" },
+    { "src": "/style.css", "dest": "/front_end/style.css" },
+    { "src": "/script.js", "dest": "/front_end/script.js" }
   ]
 }
