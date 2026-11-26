@@ -179,6 +179,7 @@ function init() {
         if (a.status !== 'aprovada') {
           msg.textContent =
             'Cadastro aguardando validação institucional. O acesso ainda não foi liberado.';
+          location.href = 'painel.html';
           return;
         }
 
