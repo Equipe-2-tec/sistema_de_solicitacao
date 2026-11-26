@@ -845,4 +845,4 @@ function archiveNotice(id) {
 // Sem esta linha a função init() nunca roda: nenhum formulário ou botão funciona.
 document.addEventListener('DOMContentLoaded', init);
 script.js
-21 KB
+
