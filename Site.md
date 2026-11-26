@@ -1,1 +1,1 @@
-https://vercel.com/2-tecnico/bolsadados/deployments
+https://bolsadados-ji64jqfgb-2-tecnico.vercel.app/index2.html
