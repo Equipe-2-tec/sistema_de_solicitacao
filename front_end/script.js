@@ -1,4 +1,3 @@
-
 const DB = {
   accounts: 'srsi_accounts',
   legacyAccount: 'srsi_account',
@@ -89,20 +88,9 @@ function account() {
   ) || null;
 }
 
-// VERIFICAÇÃO DE LOGIN CORRIGIDA
 function requireLogin() {
-  const logged = sessionStorage.getItem('srsi_logged');
-  const email = sessionStorage.getItem('srsi_logged_email');
-
-  const a = allAccounts().find(
-    x => x.email.toLowerCase() === (email || '').toLowerCase()
-  );
-
-  if (logged !== '1' || !a || a.status !== 'aprovada') {
-    sessionStorage.removeItem('srsi_logged');
-    sessionStorage.removeItem('srsi_logged_email');
-
-    location.replace('index2.html');
+  if (!account() || !sessionStorage.getItem('srsi_logged')) {
+    location.href = 'index2.html';
     return false;
   }
 
@@ -118,20 +106,6 @@ function logout() {
 function init() {
   const page = location.pathname.split('/').pop();
 
-  // PÁGINAS PÚBLICAS E PROTEÇÃO DAS PÁGINAS INTERNAS
-  const publicPages = [
-    '',
-    'index.html',
-    'index2.html',
-    'registro.html',
-    'recuperar.html'
-  ];
-
-  if (!publicPages.includes(page)) {
-    if (!requireLogin()) return;
-  }
-
-  // LOGIN
   if (page === 'index2.html' || page === '') {
     const f = document.getElementById('loginForm');
 
@@ -140,7 +114,7 @@ function init() {
 
     const fill = document.getElementById('fillDemo');
 
-    if (fill && f) {
+    if (fill) {
       fill.addEventListener('click', () => {
         f.email.value = demoEmail;
         f.senha.value = demoPassword;
@@ -214,7 +188,7 @@ function init() {
 
           logAction(
             'Acesso institucional',
-            `Login realizado: ${a.email}`
+            Login realizado: ${a.email}
           );
 
           location.href = 'painel.html';
@@ -226,7 +200,7 @@ function init() {
     }
   }
 
-  // CADASTRO
+  
   if (page === 'registro.html') {
     const f = document.getElementById('registerForm');
 
@@ -278,7 +252,7 @@ function init() {
 
       logAction(
         'Configuração inicial',
-        `Conta institucional criada: ${email}`
+        Conta institucional criada: ${email}
       );
 
       sessionStorage.setItem('srsi_logged', '1');
@@ -290,26 +264,24 @@ function init() {
     });
   }
 
-  // RECUPERAÇÃO DE SENHA
-  document.getElementById('recoverForm')?.addEventListener('submit', e => {
-    e.preventDefault();
+    document.getElementById('recoverForm')?.addEventListener('submit', e => {
+      e.preventDefault();
 
-    const recoverEmail = document.getElementById('recoverEmail');
-    const recoverMsg = document.getElementById('recoverMsg');
+      const a = allAccounts().find(
+        x => x.email.toLowerCase() ===
+        recoverEmail.value.trim().toLowerCase()
+      );
 
-    const a = allAccounts().find(
-      x => x.email.toLowerCase() ===
-      recoverEmail.value.trim().toLowerCase()
-    );
+      document.getElementById('recoverMsg').textContent =
+        a
+          ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
+          : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
+    });
+  }
 
-    recoverMsg.textContent =
-      a
-        ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
-        : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
-  });
-
-  // PAINEL
   if (page === 'painel.html') {
+    if (!requireLogin()) return;
+
     const a = account();
     const o = get(DB.occ);
 
@@ -367,8 +339,9 @@ function init() {
     };
   }
 
-  // OCORRÊNCIAS
   if (page === 'ocorrencias.html') {
+    if (!requireLogin()) return;
+
     renderOccurrenceTable();
 
     occurrenceForm.addEventListener('submit', e => {
@@ -397,7 +370,7 @@ function init() {
 
       logAction(
         'Secretaria',
-        `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`
+        Registrou e encaminhou a ocorrência ${item.id} (${item.location})
       );
 
       occurrenceMsg.textContent =
@@ -409,8 +382,9 @@ function init() {
     });
   }
 
-  // MAPA
   if (page === 'mapa.html') {
+    if (!requireLogin()) return;
+
     renderMap();
 
     document.querySelectorAll('.room').forEach(b =>
@@ -425,22 +399,24 @@ function init() {
     );
   }
 
-  // GESTÃO
   if (page === 'gestao.html') {
+    if (!requireLogin()) return;
+
     [
       'manageSearch',
       'priorityFilter',
       'statusFilter',
       'categoryFilter'
-    ].forEach(id => {
-      document.getElementById(id)?.addEventListener('input', renderManage);
-    });
+    ].forEach(id =>
+      document.getElementById(id).addEventListener('input', renderManage)
+    );
 
     renderManage();
   }
 
-  // RELATÓRIOS
   if (page === 'relatorios.html') {
+    if (!requireLogin()) return;
+
     applyReport.onclick = renderReport;
     exportCsv.onclick = exportReport;
     printReport.onclick = () => window.print();
@@ -449,8 +425,9 @@ function init() {
     renderHistory();
   }
 
-  // COMUNICADOS
   if (page === 'comunicados.html') {
+    if (!requireLogin()) return;
+
     renderNotices();
 
     noticeForm.addEventListener('submit', e => {
@@ -477,9 +454,8 @@ function init() {
       renderNotices();
     });
   }
-}
 
-// TABELA DE OCORRÊNCIAS
+
 function renderOccurrenceTable() {
   const rows = get(DB.occ);
 
@@ -496,7 +472,6 @@ function renderOccurrenceTable() {
     '<tr><td colspan="5">Nenhuma ocorrência registrada.</td></tr>';
 }
 
-// MAPA
 function renderMap() {
   const open = get(DB.occ).filter(
     x => x.status !== 'Resolvida' && x.status !== 'Arquivada'
@@ -529,7 +504,6 @@ function showRoom(room) {
       : 'Nenhuma ocorrência registrada para este ambiente.';
 }
 
-// GESTÃO DE OCORRÊNCIAS
 function renderManage() {
   const q = (manageSearch.value || '').toLowerCase();
   const p = priorityFilter.value;
@@ -568,7 +542,7 @@ function renderManage() {
             <select id="p-${x.id}">
               <option ${x.priority === 'Não definida' ? 'selected' : ''}>Não definida</option>
               ${['Urgente', 'Alta', 'Média', 'Baixa'].map(v =>
-                `<option ${x.priority === v ? 'selected' : ''}>${v}</option>`
+                <option ${x.priority === v ? 'selected' : ''}>${v}</option>
               ).join('')}
             </select>
           </div>
@@ -577,7 +551,7 @@ function renderManage() {
             <label>Situação</label>
             <select id="s-${x.id}">
               ${['Recebida', 'Em análise', 'Em andamento', 'Resolvida', 'Não resolvida', 'Arquivada'].map(v =>
-                `<option ${x.status === v ? 'selected' : ''}>${v}</option>`
+                <option ${x.status === v ? 'selected' : ''}>${v}</option>
               ).join('')}
             </select>
           </div>
@@ -639,14 +613,14 @@ function saveOccurrence(id) {
 
   x.history.push({
     date: new Date().toISOString(),
-    text: `Prioridade: ${p}; situação: ${s}${a ? '; providências: ' + a : ''}${j ? '; justificativa: ' + j : ''}`
+    text: Prioridade: ${p}; situação: ${s}${a ? '; providências: ' + a : ''}${j ? '; justificativa: ' + j : ''}
   });
 
   set(DB.occ, arr);
 
   logAction(
     'Gestão',
-    `Atualizou ${id}: ${s}, prioridade ${p}`
+    Atualizou ${id}: ${s}, prioridade ${p}
   );
 
   renderManage();
@@ -656,22 +630,17 @@ function showHistory(id) {
   const x = get(DB.occ).find(v => v.id === id);
   const el = document.getElementById('hist-' + id);
 
-  if (!el) return;
-
   el.innerHTML =
     (x?.history || []).map(h =>
-      `<p>${dateFmt(h.date)} — ${esc(h.text)}</p>`
+      <p>${dateFmt(h.date)} — ${esc(h.text)}</p>
     ).join('') ||
     'Sem atualizações ainda.';
 }
 
-// RELATÓRIOS
 function filteredReports() {
   let arr = get(DB.occ);
 
-  const periodEl = document.getElementById('period');
-
-  let period = periodEl?.value || 'all';
+  let period = periodEl.value;
   let loc = reportLocation.value;
   let cat = reportCategory.value;
   let st = reportStatus.value;
@@ -693,6 +662,8 @@ function filteredReports() {
     );
   });
 }
+
+const periodEl = document.getElementById('period');
 
 function renderReport() {
   if (!document.getElementById('reportRows')) return;
@@ -787,7 +758,6 @@ function renderHistory() {
     '<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';
 }
 
-// COMUNICADOS
 function renderNotices() {
   let n = get(DB.notices);
 
