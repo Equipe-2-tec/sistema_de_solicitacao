@@ -192,6 +192,7 @@ function init() {
           );
 
           location.href = 'painel.html';
+          
         } else {
           msg.textContent =
             'Senha incorreta. Confira a senha e tente novamente.';
