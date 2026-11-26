@@ -33,11 +33,24 @@ def abrir_pagina(pagina):
     return render_template(f'{pagina}.html')
 
 
-# Entrega o style.css, Script.js e imagens que estão dentro de front_end
+# Entrega o style.css, script.js e imagens que estão dentro de front_end.
+# A busca ignora maiúsculas/minúsculas, então "script.js" também encontra "Script.js"
+# (em servidores Linux, como Render e Railway, essa diferença faz o arquivo dar 404).
+EXTENSOES_PERMITIDAS = ['css', 'js', 'png', 'jpg', 'jpeg', 'svg', 'ico']
+
+
 @app.route('/<arquivo>.<ext>', methods=['GET'])
 def arquivos_frontend(arquivo, ext):
-    if ext in ['css', 'js', 'png', 'jpg', 'jpeg', 'svg', 'ico']:
-        return send_from_directory('front_end', f'{arquivo}.{ext}')
+    if ext.lower() not in EXTENSOES_PERMITIDAS:
+        return jsonify({"erro": "Arquivo não encontrado"}), 404
+
+    pasta = os.path.join(app.root_path, 'front_end')
+    pedido = f'{arquivo}.{ext}'.lower()
+
+    for nome in os.listdir(pasta):
+        if nome.lower() == pedido:
+            return send_from_directory(pasta, nome)
+
     return jsonify({"erro": "Arquivo não encontrado"}), 404
 
 
@@ -104,3 +117,4 @@ def cadastro():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
