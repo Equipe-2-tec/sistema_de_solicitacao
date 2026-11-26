@@ -53,49 +53,6 @@
 
 <script src="script.js"></script>
 
-<script>
-document.getElementById("registerForm").addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const school  = document.getElementById("school").value.trim();
-    const email   = document.getElementById("regEmail").value.trim();
-    const owner   = document.getElementById("owner").value.trim();
-    const pass    = document.getElementById("regPass").value;
-    const confirm = document.getElementById("regConfirm").value;
-    const msg     = document.getElementById("registerMsg");
-
-    msg.textContent = "";
-
-    if (pass !== confirm) {
-        msg.textContent = "As senhas não são iguais.";
-        return;
-    }
-
-    // 1) Sempre salva localmente (funciona mesmo se o backend estiver offline)
-    const account = { school, email, owner, password: pass };
-    localStorage.setItem("institutionAccount", JSON.stringify(account));
-    localStorage.setItem("institutionLoggedIn", "true");
-
-    // 2) Tenta registrar no backend (não bloqueia o login se falhar)
-    try {
-        const response = await fetch("/api/cadastro", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome: school, email: email, senha: pass })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (response.ok) {
-            console.info("Backend:", data.mensagem || "Cadastro registrado.");
-        } else {
-            console.warn("Backend recusou:", data.erro || response.status);
-        }
-    } catch (e) {
-        console.warn("Backend indisponível, seguindo apenas com localStorage:", e.message);
-    }
-
-    window.location.href = "painel.html";
-});
-</script>
 
 </body>
 </html>
