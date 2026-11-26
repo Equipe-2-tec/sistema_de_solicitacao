@@ -188,7 +188,7 @@ function init() {
 
           logAction(
             'Acesso institucional',
-            Login realizado: ${a.email}
+            `Login realizado: ${a.email}`
           );
 
           location.href = 'painel.html';
@@ -253,7 +253,7 @@ function init() {
 
       logAction(
         'Configuração inicial',
-        Conta institucional criada: ${email}
+        `Conta institucional criada: ${email}`
       );
 
       sessionStorage.setItem('srsi_logged', '1');
@@ -265,20 +265,19 @@ function init() {
     });
   }
 
-    document.getElementById('recoverForm')?.addEventListener('submit', e => {
-      e.preventDefault();
+  document.getElementById('recoverForm')?.addEventListener('submit', e => {
+    e.preventDefault();
 
-      const a = allAccounts().find(
-        x => x.email.toLowerCase() ===
-        recoverEmail.value.trim().toLowerCase()
-      );
+    const a = allAccounts().find(
+      x => x.email.toLowerCase() ===
+      document.getElementById('recoverEmail').value.trim().toLowerCase()
+    );
 
-      document.getElementById('recoverMsg').textContent =
-        a
-          ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
-          : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
-    });
-  }
+    document.getElementById('recoverMsg').textContent =
+      a
+        ? 'Solicitação identificada. No sistema real, um link de redefinição será enviado ao e-mail institucional.'
+        : 'Não foi encontrado cadastro com esse e-mail neste navegador.';
+  });
 
   if (page === 'painel.html') {
     if (!requireLogin()) return;
@@ -352,7 +351,7 @@ function init() {
 
       const item = {
         id: 'OCO-' + Date.now().toString(36).toUpperCase(),
-        location: location.value,
+        location: occurrenceForm.elements['location'].value,
         category: category.value,
         title: title.value.trim(),
         description: description.value.trim(),
@@ -371,7 +370,7 @@ function init() {
 
       logAction(
         'Secretaria',
-        Registrou e encaminhou a ocorrência ${item.id} (${item.location})
+        `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`
       );
 
       occurrenceMsg.textContent =
@@ -455,7 +454,7 @@ function init() {
       renderNotices();
     });
   }
-
+}
 
 function renderOccurrenceTable() {
   const rows = get(DB.occ);
@@ -543,7 +542,7 @@ function renderManage() {
             <select id="p-${x.id}">
               <option ${x.priority === 'Não definida' ? 'selected' : ''}>Não definida</option>
               ${['Urgente', 'Alta', 'Média', 'Baixa'].map(v =>
-                <option ${x.priority === v ? 'selected' : ''}>${v}</option>
+                `<option ${x.priority === v ? 'selected' : ''}>${v}</option>`
               ).join('')}
             </select>
           </div>
@@ -552,7 +551,7 @@ function renderManage() {
             <label>Situação</label>
             <select id="s-${x.id}">
               ${['Recebida', 'Em análise', 'Em andamento', 'Resolvida', 'Não resolvida', 'Arquivada'].map(v =>
-                <option ${x.status === v ? 'selected' : ''}>${v}</option>
+                `<option ${x.status === v ? 'selected' : ''}>${v}</option>`
               ).join('')}
             </select>
           </div>
@@ -614,14 +613,14 @@ function saveOccurrence(id) {
 
   x.history.push({
     date: new Date().toISOString(),
-    text: Prioridade: ${p}; situação: ${s}${a ? '; providências: ' + a : ''}${j ? '; justificativa: ' + j : ''}
+    text: `Prioridade: ${p}; situação: ${s}${a ? '; providências: ' + a : ''}${j ? '; justificativa: ' + j : ''}`
   });
 
   set(DB.occ, arr);
 
   logAction(
     'Gestão',
-    Atualizou ${id}: ${s}, prioridade ${p}
+    `Atualizou ${id}: ${s}, prioridade ${p}`
   );
 
   renderManage();
@@ -633,7 +632,7 @@ function showHistory(id) {
 
   el.innerHTML =
     (x?.history || []).map(h =>
-      <p>${dateFmt(h.date)} — ${esc(h.text)}</p>
+      `<p>${dateFmt(h.date)} — ${esc(h.text)}</p>`
     ).join('') ||
     'Sem atualizações ainda.';
 }
@@ -822,25 +821,4 @@ function archiveNotice(id) {
 
     set(DB.notices, n);
 
-    logAction('Gestão', 'Arquivou comunicado: ' + x.title);
-
-    renderNotices();
-  }
-}
-
-function restoreNotice(id) {
-  let n = get(DB.notices);
-  let x = n.find(v => v.id === id);
-
-  if (x) {
-    x.archived = false;
-
-    set(DB.notices, n);
-
-    logAction('Gestão', 'Restaurou comunicado: ' + x.title);
-
-    renderNotices();
-  }
-}
-
-document.addEventListener('DOMContentLoaded', init);
+    logAction('Gestão', 'Arquivou comunicado:
