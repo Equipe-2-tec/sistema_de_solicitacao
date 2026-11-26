@@ -24,18 +24,17 @@
         </p>
 
         <div class="notice">
-            Após concluir o cadastro, você será direcionado
-            automaticamente para o painel.
+            Confirme o acesso à sua caixa de e-mail para concluir o cadastro.
         </div>
 
         <form id="registerForm">
 
             <label for="school">Nome da escola</label>
-            <input id="school" required
+            <input id="school" maxlength="150" required
                 placeholder="Nome completo da instituição">
 
             <label for="regEmail">E-mail institucional</label>
-            <input id="regEmail" type="email" required
+            <input id="regEmail" type="email" maxlength="150" required
                 placeholder="E-mail institucional">
 
             <label for="owner">Nome do responsável</label>
@@ -44,19 +43,23 @@
 
             <label for="regPass">Senha</label>
             <input id="regPass" type="password"
-                minlength="8" required
+                minlength="8" maxlength="128" required
                 placeholder="Mínimo de 8 caracteres">
 
             <label for="regConfirm">Confirmação da senha</label>
             <input id="regConfirm" type="password"
-                minlength="8" required
+                minlength="8" maxlength="128" required
                 placeholder="Repita a senha">
 
-            <button type="submit" id="btnSubmit">
-                Criar conta e acessar painel
-            </button>
+            <button type="button" id="sendEmailCode">Enviar código por e-mail</button>
 
-            <p id="registerMsg" class="muted" style="color: red; font-weight: bold;"></p>
+            <label for="emailCode">Código de confirmação</label>
+            <input id="emailCode" required maxlength="512" autocomplete="one-time-code"
+                autocapitalize="off" spellcheck="false">
+
+            <button type="submit" id="btnSubmit">Confirmar código e criar conta</button>
+
+            <p id="registerMsg" class="muted" role="status"></p>
 
         </form>
 
@@ -69,73 +72,6 @@
 
 <script src="script.js"></script>
 
-<script>
-document.getElementById("registerForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    const school = document.getElementById("school").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const owner = document.getElementById("owner").value.trim();
-    const pass = document.getElementById("regPass").value;
-    const confirm = document.getElementById("regConfirm").value;
-    const msg = document.getElementById("registerMsg");
-    const btn = document.getElementById("btnSubmit");
-
-    // Limpa a mensagem anterior
-    msg.textContent = "";
-
-    if (pass !== confirm) {
-        msg.textContent = "As senhas não são iguais.";
-        return;
-    }
-
-    // Desabilita o botão para evitar cliques duplos enquanto o banco processa
-    btn.disabled = true;
-    btn.textContent = "Salvando no banco...";
-
-    try {
-        // Envia os dados para o backend na Vercel
-        const response = await fetch("/api/cadastro", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                nome: school, 
-                email: email, 
-                senha: pass 
-            })
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        // Se o banco recusar (ex: e-mail duplicado)
-        if (!response.ok) {
-            msg.textContent = data.erro || data.detalhe || "Erro ao cadastrar. Verifique os dados.";
-            // Reativa o botão para o usuário tentar de novo
-            btn.disabled = false;
-            btn.textContent = "Criar conta e acessar painel";
-            return; // Para a execução aqui e NÃO redireciona
-        }
-
-        // Se deu certo, salva os dados locais e redireciona
-        const account = { school, email, owner, password: pass };
-        localStorage.setItem("institutionAccount", JSON.stringify(account));
-        localStorage.setItem("institutionLoggedIn", "true");
-
-        msg.style.color = "green";
-        msg.textContent = "Cadastro realizado com sucesso! Redirecionando...";
-        
-        setTimeout(() => {
-            window.location.href = "painel.html";
-        }, 1000);
-
-    } catch (error) {
-        // Se a internet cair ou o servidor estiver fora do ar
-        msg.textContent = "Erro de conexão com o servidor. Tente novamente mais tarde.";
-        btn.disabled = false;
-        btn.textContent = "Criar conta e acessar painel";
-    }
-});
-</script>
 
 </body>
 </html>

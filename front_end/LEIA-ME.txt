@@ -8,8 +8,8 @@ Como abrir:
    Senha: Escola12345
    Clique em "Preencher acesso de teste" e depois em "Entrar no sistema".
 4. A conta de demonstração é criada automaticamente no primeiro acesso, se ainda não existir outra conta neste navegador.
-5. Para testar o cadastro institucional, use registro.html e depois validar-demo.html.
-6. Os dados ficam no localStorage do navegador e não são compartilhados entre computadores.
+5. Para testar o cadastro institucional, configure o envio de e-mail e o MySQL conforme o README.md. Em registro.html, confirme o código recebido na caixa de entrada.
+6. Os dados do painel ficam no localStorage do navegador e não são compartilhados entre computadores.
 
 Arquivos:
 index2.html       Acesso institucional

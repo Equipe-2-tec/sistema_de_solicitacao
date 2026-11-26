@@ -103,6 +103,19 @@ function logout() {
   location.href = 'index2.html';
 }
 
+async function postJson(url, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.erro || 'Não foi possível concluir a operação.');
+  }
+  return data;
+}
+
 function init() {
   const page = location.pathname.split('/').pop() || 'index2.html';
 
@@ -125,7 +138,7 @@ function init() {
     }
 
     if (f) {
-      f.addEventListener('submit', e => {
+      f.addEventListener('submit', async e => {
         e.preventDefault();
 
         const msg = document.getElementById('loginMsg');
@@ -182,7 +195,25 @@ function init() {
           return;
         }
 
-        if (enteredPassword === a.password) {
+        let senhaCorreta = enteredPassword === a.password;
+        if (a.emailVerificado) {
+          const button = f.querySelector('button[type="submit"]');
+          button.disabled = true;
+          try {
+            const resultado = await postJson('/api/login', {
+              email: enteredEmail,
+              senha: enteredPassword
+            });
+            senhaCorreta = resultado.autenticado === true;
+          } catch (erro) {
+            msg.textContent = erro.message;
+            return;
+          } finally {
+            button.disabled = false;
+          }
+        }
+
+        if (senhaCorreta) {
           sessionStorage.setItem('srsi_logged', '1');
           sessionStorage.setItem('srsi_logged_email', a.email);
 
@@ -204,82 +235,88 @@ function init() {
   
   if (page === 'registro.html') {
     const f = document.getElementById('registerForm');
+    const msg = document.getElementById('registerMsg');
+    const enviar = document.getElementById('sendEmailCode');
+    const confirmar = document.getElementById('btnSubmit');
 
-    f?.addEventListener('submit', e => {
-      e.preventDefault();
+    f.regEmail.addEventListener('input', () => {
+      f.emailCode.value = '';
+      msg.textContent = '';
+    });
 
-      const msg = document.getElementById('registerMsg');
-      let list = allAccounts();
-
-      if (list.length >= MAX_ACCOUNTS) {
-        msg.textContent =
-          'Limite atingido: o sistema permite no máximo 10 contas.';
-        return;
-      }
-
+    enviar.addEventListener('click', async () => {
+      if (!f.regEmail.reportValidity()) return;
       const email = f.regEmail.value.trim().toLowerCase();
 
-      if (list.some(a => a.email.toLowerCase() === email)) {
-        msg.textContent =
-          'Este e-mail já está cadastrado. Utilize outro e-mail.';
+      enviar.disabled = true;
+      confirmar.disabled = true;
+      f.regEmail.readOnly = true;
+      try {
+        const data = await postJson('/api/cadastro/enviar-codigo', { email });
+        msg.textContent = data.mensagem;
+        f.emailCode.focus();
+      } catch (erro) {
+        msg.textContent = erro.message;
+      } finally {
+        enviar.disabled = false;
+        confirmar.disabled = false;
+        f.regEmail.readOnly = false;
+      }
+    });
+
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const list = allAccounts();
+      const school = f.school.value.trim();
+      const email = f.regEmail.value.trim().toLowerCase();
+      const owner = f.owner.value.trim();
+      const senha = f.regPass.value;
+      const codigo = f.emailCode.value.trim();
+
+      if (list.length >= MAX_ACCOUNTS) {
+        msg.textContent = 'Limite atingido: o sistema permite no máximo 10 contas.';
         return;
       }
 
-      if (f.regPass.value !== f.regConfirm.value) {
+      if (list.some(a => a.email.toLowerCase() === email)) {
+        msg.textContent = 'Este e-mail já está cadastrado neste navegador.';
+        return;
+      }
+
+      if (senha !== f.regConfirm.value) {
         msg.textContent = 'As senhas não correspondem.';
         return;
       }
 
-      if (f.regPass.value.length < 8) {
-        msg.textContent =
-          'A senha precisa ter pelo menos 8 caracteres.';
-        return;
-      }
-
-      const assignedRole =
-        ACCOUNT_ROLES[list.length] || 'Aluno';
-
-      list.push({
-        school: f.school.value.trim(),
-        email,
-        owner: f.owner.value.trim(),
-        password: f.regPass.value,
-        role: assignedRole,
-        status: 'aprovada',
-        created: new Date().toISOString()
-      });
-
-      try { saveAccounts(list); } catch (erro) {
-        msg.textContent = 'Não foi possível salvar o cadastro neste navegador.';
-        return;
-      }
-
-      // Envia o cadastro ao backend (Python/MySQL) sem travar o acesso.
-      // keepalive deixa o envio terminar mesmo quando a página muda.
+      enviar.disabled = true;
+      confirmar.disabled = true;
+      msg.textContent = 'Confirmando e-mail e criando a conta...';
       try {
-        fetch('/api/cadastro', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nome: f.school.value.trim(),
-            email,
-            senha: f.regPass.value
-          }),
-          keepalive: true
-        }).catch(() => {});
-      } catch (e) {}
+        await postJson('/api/cadastro', { nome: school, email, senha, codigo });
+      } catch (erro) {
+        msg.textContent = erro.message;
+        return;
+      } finally {
+        enviar.disabled = false;
+        confirmar.disabled = false;
+      }
 
-      logAction(
-        'Configuração inicial',
-        `Conta institucional criada: ${email}`
-      );
-
-      sessionStorage.setItem('srsi_logged', '1');
-      sessionStorage.setItem('srsi_logged_email', email);
-
-      msg.textContent = 'Cadastro local realizado! E-mail não verificado. Redirecionando...';
-
-      location.href = 'painel.html';
+      try {
+        saveAccounts([...allAccounts(), {
+          school,
+          email,
+          owner,
+          emailVerificado: true,
+          status: 'aprovada',
+          created: new Date().toISOString()
+        }]);
+        sessionStorage.setItem('srsi_logged', '1');
+        sessionStorage.setItem('srsi_logged_email', email);
+        logAction('Configuração inicial', `Conta institucional criada: ${email}`);
+        location.href = 'painel.html';
+      } catch {
+        msg.textContent = 'Conta criada, mas o navegador não conseguiu salvar os dados locais.';
+      }
     });
   }
 
