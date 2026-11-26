@@ -104,9 +104,9 @@ function logout() {
 }
 
 function init() {
-  const page = location.pathname.split('/').pop();
+  const page = location.pathname.split('/').pop() || 'index2.html';
 
-  if (page === 'index2.html' || page === '') {
+  if (page === 'index2.html' || page === 'index.html') {
     const f = document.getElementById('loginForm');
 
     const demoEmail = 'teste.escola@gmail.com';
@@ -249,7 +249,10 @@ function init() {
         created: new Date().toISOString()
       });
 
-      saveAccounts(list);
+      try { saveAccounts(list); } catch (erro) {
+        msg.textContent = 'Não foi possível salvar o cadastro neste navegador.';
+        return;
+      }
 
       // Envia o cadastro ao backend (Python/MySQL) sem travar o acesso.
       // keepalive deixa o envio terminar mesmo quando a página muda.
@@ -274,7 +277,7 @@ function init() {
       sessionStorage.setItem('srsi_logged', '1');
       sessionStorage.setItem('srsi_logged_email', email);
 
-      msg.textContent = 'Cadastro realizado! Redirecionando...';
+      msg.textContent = 'Cadastro local realizado! E-mail não verificado. Redirecionando...';
 
       location.href = 'painel.html';
     });
@@ -296,105 +299,92 @@ function init() {
 
   if (page === 'painel.html') {
     if (!requireLogin()) return;
-
     const a = account();
     const o = get(DB.occ);
+    const el = id => document.getElementById(id);
 
-    schoolTitle.textContent =
-      (a?.school || 'Instituição') + ' • Visão geral';
+    if (el('schoolTitle')) el('schoolTitle').textContent = (a?.school || 'Instituição') + ' • Visão geral';
+    if (el('total')) el('total').textContent = o.length;
+    if (el('pending')) el('pending').textContent = o.filter(x => ['Recebida', 'Em análise'].includes(x.status)).length;
+    if (el('progress')) el('progress').textContent = o.filter(x => x.status === 'Em andamento').length;
+    if (el('done')) el('done').textContent = o.filter(x => x.status === 'Resolvida').length;
 
-    total.textContent = o.length;
+    const activityRows = el('activityRows');
+    if (activityRows) {
+      activityRows.innerHTML = get(DB.logs).slice(0, 12).map(x => `
+        <tr><td>${dateFmt(x.date)}</td><td>${esc(x.sector)}</td><td>${esc(x.action)}</td></tr>
+      `).join('') || '<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';
+    }
 
-    pending.textContent =
-      o.filter(x =>
-        ['Recebida', 'Em análise'].includes(x.status)
-      ).length;
+    const validationStatus = el('validationStatus');
+    if (validationStatus) validationStatus.textContent = 'Status do cadastro: ' + (a?.status || 'não cadastrado');
 
-    progress.textContent =
-      o.filter(x => x.status === 'Em andamento').length;
-
-    done.textContent =
-      o.filter(x => x.status === 'Resolvida').length;
-
-    const rows = get(DB.logs).slice(0, 12);
-
-    activityRows.innerHTML =
-      rows.map(x =>
-        `<tr>
-          <td>${dateFmt(x.date)}</td>
-          <td>${esc(x.sector)}</td>
-          <td>${esc(x.action)}</td>
-        </tr>`
-      ).join('') ||
-      '<tr><td colspan="3">Nenhuma atividade registrada.</td></tr>';
-
-    const ac = account();
-
-    validationStatus.textContent =
-      'Status do cadastro: ' + (ac?.status || 'não cadastrado');
-
-    approveDemo.onclick = () => {
-      if (!ac) return;
-
-      ac.status = 'aprovada';
-
-      saveAccounts(
-        allAccounts().map(x =>
-          x.email === ac.email ? ac : x
-        )
-      );
-
-      validationStatus.textContent =
-        'Status do cadastro: aprovada (simulação)';
-
-      logAction(
-        'Validação institucional',
-        'Validação simulada para fins de demonstração'
-      );
+    const approveDemo = el('approveDemo');
+    if (approveDemo) approveDemo.onclick = () => {
+      if (!a) return;
+      a.status = 'aprovada';
+      saveAccounts(allAccounts().map(x => x.email === a.email ? a : x));
+      if (validationStatus) validationStatus.textContent = 'Status do cadastro: aprovada (simulação)';
+      logAction('Validação institucional', 'Validação simulada para fins de demonstração');
     };
   }
 
   if (page === 'ocorrencias.html') {
     if (!requireLogin()) return;
 
+    const form = document.getElementById('occurrenceForm');
+    const mensagem = document.getElementById('occurrenceMsg');
     renderOccurrenceTable();
 
-    occurrenceForm.addEventListener('submit', e => {
-      e.preventDefault();
+    if (form) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
 
-      const files = [...attachments.files].map(f => f.name);
+        const localCampo = document.getElementById('location');
+        const categoriaCampo = document.getElementById('category');
+        const tituloCampo = document.getElementById('title');
+        const descricaoCampo = document.getElementById('description');
+        const anexosCampo = document.getElementById('attachments');
 
-      const item = {
-        id: 'OCO-' + Date.now().toString(36).toUpperCase(),
-        location: occurrenceForm.elements['location'].value,
-        category: category.value,
-        title: title.value.trim(),
-        description: description.value.trim(),
-        files,
-        created: new Date().toISOString(),
-        priority: 'Não definida',
-        status: 'Recebida',
-        actions: [],
-        history: []
-      };
+        if (!localCampo || !categoriaCampo || !tituloCampo || !descricaoCampo || !mensagem) {
+          alert('Não foi possível localizar os campos do formulário.');
+          return;
+        }
 
-      let arr = get(DB.occ);
+        if (!localCampo.value || !categoriaCampo.value || !tituloCampo.value.trim() || !descricaoCampo.value.trim()) {
+          mensagem.textContent = 'Preencha todos os campos obrigatórios.';
+          return;
+        }
 
-      arr.unshift(item);
-      set(DB.occ, arr);
+        const files = anexosCampo ? Array.from(anexosCampo.files).map(file => file.name) : [];
+        const item = {
+          id: 'OCO-' + Date.now().toString(36).toUpperCase(),
+          location: localCampo.value,
+          category: categoriaCampo.value,
+          title: tituloCampo.value.trim(),
+          description: descricaoCampo.value.trim(),
+          files,
+          created: new Date().toISOString(),
+          priority: 'Não definida',
+          status: 'Recebida',
+          actions: [],
+          history: []
+        };
 
-      logAction(
-        'Secretaria',
-        `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`
-      );
-
-      occurrenceMsg.textContent =
-        'Ocorrência registrada! Protocolo: ' + item.id;
-
-      occurrenceForm.reset();
-
-      renderOccurrenceTable();
-    });
+        try {
+          const arr = get(DB.occ);
+          arr.unshift(item);
+          set(DB.occ, arr);
+          logAction('Secretaria', `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`);
+          mensagem.textContent = 'Ocorrência registrada com sucesso! Protocolo: ' + item.id;
+          form.reset();
+          renderOccurrenceTable();
+        } catch (erro) {
+          console.error('Erro ao salvar ocorrência:', erro);
+          mensagem.textContent = 'Não foi possível salvar o registro neste navegador. Verifique o armazenamento disponível.';
+        }
+      });
+    }
   }
 
   if (page === 'mapa.html') {
@@ -416,16 +406,13 @@ function init() {
 
   if (page === 'gestao.html') {
     if (!requireLogin()) return;
-
-    [
-      'manageSearch',
-      'priorityFilter',
-      'statusFilter',
-      'categoryFilter'
-    ].forEach(id =>
-      document.getElementById(id).addEventListener('input', renderManage)
-    );
-
+    ['manageSearch', 'priorityFilter', 'statusFilter', 'categoryFilter'].forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        field.addEventListener('input', renderManage);
+        field.addEventListener('change', renderManage);
+      }
+    });
     renderManage();
   }
 
@@ -473,18 +460,18 @@ function init() {
 
 function renderOccurrenceTable() {
   const rows = get(DB.occ);
+  const tabela = document.getElementById('occurrenceRows');
+  if (!tabela) return;
 
-  occurrenceRows.innerHTML =
-    rows.map(x =>
-      `<tr>
-        <td>${esc(x.id)}</td>
-        <td>${esc(x.location)}</td>
-        <td>${esc(x.category)}</td>
-        <td>${dateFmt(x.created)}</td>
-        <td><span class="badge">${esc(x.status)}</span></td>
-      </tr>`
-    ).join('') ||
-    '<tr><td colspan="5">Nenhuma ocorrência registrada.</td></tr>';
+  tabela.innerHTML = rows.map(x => `
+    <tr>
+      <td>${esc(x.id)}</td>
+      <td>${esc(x.location)}</td>
+      <td>${esc(x.category)}</td>
+      <td>${dateFmt(x.created)}</td>
+      <td><span class="badge">${esc(x.status)}</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="5">Nenhuma ocorrência registrada.</td></tr>';
 }
 
 function renderMap() {
@@ -520,77 +507,48 @@ function showRoom(room) {
 }
 
 function renderManage() {
-  const q = (manageSearch.value || '').toLowerCase();
-  const p = priorityFilter.value;
-  const s = statusFilter.value;
-  const c = categoryFilter.value;
+  const search = document.getElementById('manageSearch');
+  const priority = document.getElementById('priorityFilter');
+  const status = document.getElementById('statusFilter');
+  const category = document.getElementById('categoryFilter');
+  const cards = document.getElementById('manageCards');
+  if (!cards) return;
 
+  const q = (search?.value || '').toLowerCase();
+  const p = priority?.value || '';
+  const s = status?.value || '';
+  const c = category?.value || '';
   const rows = get(DB.occ).filter(x =>
     (!q || (x.id + x.location + x.title).toLowerCase().includes(q)) &&
-    (!p || x.priority === p) &&
-    (!s || x.status === s) &&
-    (!c || x.category === c)
+    (!p || x.priority === p) && (!s || x.status === s) && (!c || x.category === c)
   );
 
-  manageCards.innerHTML =
-    rows.map(x =>
-      `<article class="card">
-        <div class="actions" style="justify-content:space-between">
-          <h2>${esc(x.title)}</h2>
-          <span class="badge">${esc(x.id)}</span>
-        </div>
-
-        <p class="muted">
-          ${esc(x.location)} • ${esc(x.category)} • Registrada em ${dateFmt(x.created)}
-        </p>
-
-        <p>${esc(x.description)}</p>
-
-        <p>
-          <b>Anexos:</b>
-          ${x.files?.length ? x.files.map(esc).join(', ') : 'Nenhum'}
-        </p>
-
-        <div class="form-grid">
-          <div>
-            <label>Prioridade</label>
-            <select id="p-${x.id}">
-              <option ${x.priority === 'Não definida' ? 'selected' : ''}>Não definida</option>
-              ${['Urgente', 'Alta', 'Média', 'Baixa'].map(v =>
-                `<option ${x.priority === v ? 'selected' : ''}>${v}</option>`
-              ).join('')}
-            </select>
-          </div>
-
-          <div>
-            <label>Situação</label>
-            <select id="s-${x.id}">
-              ${['Recebida', 'Em análise', 'Em andamento', 'Resolvida', 'Não resolvida', 'Arquivada'].map(v =>
-                `<option ${x.status === v ? 'selected' : ''}>${v}</option>`
-              ).join('')}
-            </select>
-          </div>
-
-          <div class="full">
-            <label>Providências / atualização</label>
-            <textarea id="a-${x.id}" placeholder="Descreva as medidas tomadas ou a atualização diária"></textarea>
-          </div>
-
-          <div class="full">
-            <label>Justificativa (obrigatória se marcar Não resolvida)</label>
-            <textarea id="j-${x.id}" placeholder="Explique por que não foi possível resolver"></textarea>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button onclick="saveOccurrence('${x.id}')">Salvar atualização</button>
-          <button class="secondary small" onclick="showHistory('${x.id}')">Ver histórico</button>
-        </div>
-
-        <div id="hist-${x.id}" class="muted" style="margin-top:10px"></div>
-      </article>`
-    ).join('') ||
-    '<div class="card empty">Nenhuma ocorrência encontrada.</div>';
+  cards.innerHTML = rows.map(x => `
+    <article class="card">
+      <div class="actions" style="justify-content:space-between">
+        <h2>${esc(x.title)}</h2><span class="badge">${esc(x.id)}</span>
+      </div>
+      <p class="muted">${esc(x.location)} • ${esc(x.category)} • Registrada em ${dateFmt(x.created)}</p>
+      <p>${esc(x.description)}</p>
+      <p><b>Anexos:</b> ${x.files?.length ? x.files.map(esc).join(', ') : 'Nenhum'}</p>
+      <div class="form-grid">
+        <div><label>Prioridade</label><select id="p-${esc(x.id)}">
+          <option ${x.priority === 'Não definida' ? 'selected' : ''}>Não definida</option>
+          ${['Urgente', 'Alta', 'Média', 'Baixa'].map(v => `<option ${x.priority === v ? 'selected' : ''}>${v}</option>`).join('')}
+        </select></div>
+        <div><label>Situação</label><select id="s-${esc(x.id)}">
+          ${['Recebida', 'Em análise', 'Em andamento', 'Resolvida', 'Não resolvida', 'Arquivada'].map(v => `<option ${x.status === v ? 'selected' : ''}>${v}</option>`).join('')}
+        </select></div>
+        <div class="full"><label>Providências / atualização</label><textarea id="a-${esc(x.id)}" placeholder="Descreva as medidas tomadas ou a atualização diária"></textarea></div>
+        <div class="full"><label>Justificativa (obrigatória se marcar Não resolvida)</label><textarea id="j-${esc(x.id)}" placeholder="Explique por que não foi possível resolver"></textarea></div>
+      </div>
+      <div class="actions">
+        <button onclick="saveOccurrence('${esc(x.id)}')">Salvar atualização</button>
+        <button class="secondary small" onclick="showHistory('${esc(x.id)}')">Ver histórico</button>
+      </div>
+      <div id="hist-${esc(x.id)}" class="muted" style="margin-top:10px"></div>
+    </article>
+  `).join('') || '<div class="card empty">Nenhuma ocorrência encontrada.</div>';
 }
 
 function saveOccurrence(id) {
@@ -599,10 +557,15 @@ function saveOccurrence(id) {
 
   if (!x) return;
 
-  const p = document.getElementById('p-' + id).value;
-  const s = document.getElementById('s-' + id).value;
-  const a = document.getElementById('a-' + id).value.trim();
-  const j = document.getElementById('j-' + id).value.trim();
+  const pField = document.getElementById('p-' + id);
+  const sField = document.getElementById('s-' + id);
+  const aField = document.getElementById('a-' + id);
+  const jField = document.getElementById('j-' + id);
+  if (!pField || !sField || !aField || !jField) return;
+  const p = pField.value;
+  const s = sField.value;
+  const a = aField.value.trim();
+  const j = jField.value.trim();
 
   if (s === 'Não resolvida' && !j) {
     alert('Informe a justificativa para uma ocorrência não resolvida.');
@@ -616,6 +579,9 @@ function saveOccurrence(id) {
 
   x.priority = p;
   x.status = s;
+
+  if (!Array.isArray(x.actions)) x.actions = [];
+  if (!Array.isArray(x.history)) x.history = [];
 
   if (a) {
     x.actions.push({
@@ -836,7 +802,8 @@ function archiveNotice(id) {
 
     set(DB.notices, n);
 
-    logAction ('Gestão', 'Arquivou comunicado:') 
+    logAction('Gestão', 'Arquivou comunicado: ' + x.title);
+    renderNotices(); 
     
      }
       }
@@ -844,5 +811,13 @@ function archiveNotice(id) {
 // Inicia a página quando o HTML terminar de carregar.
 // Sem esta linha a função init() nunca roda: nenhum formulário ou botão funciona.
 document.addEventListener('DOMContentLoaded', init);
-script.js
 
+function restoreNotice(id) {
+  const n = get(DB.notices);
+  const x = n.find(v => v.id === id);
+  if (!x) return;
+  x.archived = false;
+  set(DB.notices, n);
+  logAction('Gestão', 'Restaurou comunicado: ' + x.title);
+  renderNotices();
+}
