@@ -1,103 +1,274 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cadastro institucional</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Institucional - Sistema de Registro</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #ffffff;
+    min-height: 100vh;
+}
+
+header {
+    padding: 25px 8%;
+    border-bottom: 1px solid #ddd;
+}
+
+header h1 {
+    color: #16833b;
+    font-size: 27px;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.cadastro {
+    background: white;
+    width: 450px;
+    max-width: 100%;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 3px 18px #00000012;
+}
+
+h2 {
+    color: #16833b;
+    margin-bottom: 12px;
+}
+
+p {
+    color: #777;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #16833b;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: #16833b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #10652d;
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    border-radius: 5px;
+    padding: 12px;
+    text-decoration: none;
+    color: white;
+    background-color: #16833b;
+}
+
+a:hover {
+    background: #10652d;
+}
+
+.aviso {
+    background: #f0f8f2;
+    border-left: 4px solid #16833b;
+    padding: 12px;
+    margin-bottom: 20px;
+    color: #444;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#mensagem {
+    margin-top: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 500px) {
+    header h1 {
+        font-size: 22px;
+    }
+
+    .cadastro {
+        padding: 30px 22px;
+    }
+}
+</style>
 </head>
+
 <body>
 
 <header>
-    <a class="brand" href="index2.html">
-        Sistema de Registro de Solicitações
-    </a>
+    <h1>Sistema de Registro de Solicitações</h1>
 </header>
 
-<main class="auth">
-    <section class="card">
+<main>
 
-        <h1>Criar conta institucional</h1>
+<div class="cadastro">
 
-        <p class="sub">
-            Preencha os dados para cadastrar sua instituição.
-        </p>
+    <h2>Criar conta institucional</h2>
 
-        <div class="notice">
-            Após concluir o cadastro, você será direcionado
-            automaticamente para o painel.
-        </div>
+    <p>
+        Preencha os dados da instituição para realizar
+        a configuração inicial do sistema.
+    </p>
 
-        <form id="registerForm">
+    <div class="aviso">
+        Atenção: a conta institucional será criada
+        apenas uma vez pela escola e deverá passar
+        por uma validação institucional.
+    </div>
 
-            <label for="school">Nome da escola</label>
-            <input id="school" required
-                placeholder="Nome completo da instituição">
+    <form id="cadastroForm">
 
-            <label for="regEmail">E-mail institucional</label>
-            <input id="regEmail" type="email" required
-                placeholder="E-mail institucional">
+        <label for="escola">Nome da escola</label>
 
-            <label for="owner">Nome do responsável</label>
-            <input id="owner" required
-                placeholder="Nome do responsável">
+        <input
+            type="text"
+            id="escola"
+            name="escola"
+            placeholder="Digite o nome da escola"
+            autocomplete="organization"
+            required
+        >
 
-            <label for="regPass">Senha</label>
-            <input id="regPass" type="password"
-                minlength="8" required
-                placeholder="Mínimo de 8 caracteres">
+        <label for="email">E-mail institucional</label>
 
-            <label for="regConfirm">Confirmação da senha</label>
-            <input id="regConfirm" type="password"
-                minlength="8" required
-                placeholder="Repita a senha">
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Digite o e-mail institucional"
+            autocomplete="email"
+            required
+        >
 
-            <button type="submit">
-                Criar conta e acessar painel
-            </button>
+        <label for="responsavel">Nome do responsável pela criação</label>
 
-            <p id="registerMsg" class="muted"></p>
+        <input
+            type="text"
+            id="responsavel"
+            name="responsavel"
+            placeholder="Digite o nome do responsável"
+            autocomplete="name"
+            required
+        >
 
-        </form>
+        <label for="senha">Senha</label>
 
-        <a class="btn secondary" href="registro.html">
-            Voltar para a página inicial
-        </a>
+        <input
+            type="password"
+            id="senha"
+            name="senha"
+            placeholder="Crie uma senha"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
 
-    </section>
+        <label for="confirmar">Confirmação da senha</label>
+
+        <input
+            type="password"
+            id="confirmar"
+            name="confirmar"
+            placeholder="Confirme sua senha"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">
+            Criar conta institucional
+        </button>
+
+        <div id="mensagem" role="status"></div>
+
+    </form>
+
+    <a href="index2.html">Voltar para a página inicial</a>
+
+</div>
+
 </main>
 
-<script src="script.js"></script>
-
 <script>
-document.getElementById("registerForm").addEventListener("submit", function(event) {
+
+document.getElementById("cadastroForm").addEventListener("submit", function(event) {
+
     event.preventDefault();
 
-    const school = document.getElementById("school").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const owner = document.getElementById("owner").value.trim();
-    const pass = document.getElementById("regPass").value;
-    const confirm = document.getElementById("regConfirm").value;
-    const msg = document.getElementById("registerMsg");
+    const escola = document.getElementById("escola").value;
+    const email = document.getElementById("email").value;
+    const responsavel = document.getElementById("responsavel").value;
+    const senha = document.getElementById("senha").value;
+    const confirmar = document.getElementById("confirmar").value;
 
-    if (pass !== confirm) {
-        msg.textContent = "As senhas não são iguais.";
+    const mensagem = document.getElementById("mensagem");
+
+    if (senha.length < 8) {
+        mensagem.style.color = "red";
+        mensagem.textContent = "A senha deve possuir pelo menos 8 caracteres.";
         return;
     }
 
-    const account = {
-        school: school,
-        email: email,
-        owner: owner,
-        password: pass
-    };
+    if (senha !== confirmar) {
+        mensagem.style.color = "red";
+        mensagem.textContent = "As senhas não correspondem. Confira novamente.";
+        return;
+    }
 
-    localStorage.setItem("institutionAccount", JSON.stringify(account));
-    localStorage.setItem("institutionLoggedIn", "true");
+    mensagem.style.color = "#16833b";
 
-    window.location.href = "painel.html";
+    mensagem.textContent =
+        "Dados preenchidos corretamente! O cadastro deverá passar por validação institucional antes da liberação do acesso.";
+
+    // Os dados ainda precisam ser enviados
+    // para um servidor que realize a validação institucional.
+
 });
+
 </script>
+
+<script src="script.js"></script>
 
 </body>
 </html>
