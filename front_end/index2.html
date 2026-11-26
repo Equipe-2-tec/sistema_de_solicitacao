@@ -81,6 +81,13 @@
       const account = {
         email: email,
         senha: senha,
+         };
+
+    localStorage.setItem("institutionAccount", JSON.stringify(account));
+    localStorage.setItem("institutionLoggedIn", "true");
+
+    window.location.href = "painel.html";
+});
 
     
   </script>
