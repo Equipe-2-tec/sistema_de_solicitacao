@@ -73,6 +73,12 @@
     const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value.trim();
 
+      if (senha !== confirm) {
+        msg.textContent = "A senha está incorreta.";
+        return;
+    }
+
+
     
   </script>
   
