@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/",                 "destination": "/front_end/index2.html" },
+    { "source": "/index2.html",      "destination": "/front_end/index2.html" },
+    { "source": "/registro.html",    "destination": "/front_end/registro.html" },
+    { "source": "/painel.html",      "destination": "/front_end/painel.html" },
+    { "source": "/mapa.html",        "destination": "/front_end/mapa.html" },
+    { "source": "/ocorrencias.html", "destination": "/front_end/ocorrencias.html" },
+    { "source": "/gestao.html",      "destination": "/front_end/gestao.html" },
+    { "source": "/relatorios.html",  "destination": "/front_end/relatorios.html" },
+    { "source": "/comunicados.html", "destination": "/front_end/comunicados.html" },
+    { "source": "/recuperar.html",   "destination": "/front_end/recuperar.html" },
+    { "source": "/style.css",        "destination": "/front_end/style.css" },
+    { "source": "/script.js",        "destination": "/front_end/script.js" },
+    { "source": "/api/(.*)",         "destination": "/api/index" }
+  ]
+}
