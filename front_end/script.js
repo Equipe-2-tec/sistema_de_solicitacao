@@ -251,6 +251,21 @@ function init() {
 
       saveAccounts(list);
 
+      // Envia o cadastro ao backend (Python/MySQL) sem travar o acesso.
+      // keepalive deixa o envio terminar mesmo quando a página muda.
+      try {
+        fetch('/api/cadastro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: f.school.value.trim(),
+            email,
+            senha: f.regPass.value
+          }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (e) {}
+
       logAction(
         'Configuração inicial',
         `Conta institucional criada: ${email}`
@@ -339,75 +354,48 @@ function init() {
     };
   }
 
-if (page === 'ocorrencias.html') {
-  renderOccurrenceTable();
-
-  const occurrenceForm = document.getElementById('occurrenceForm');
-
-  occurrenceForm?.addEventListener('submit', e => {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-
-    const localCampo = form.querySelector('[name="location"]') ||
-                       document.getElementById('location');
-
-    const categoriaCampo = form.querySelector('[name="category"]') ||
-                           document.getElementById('category');
-
-    const tituloCampo = form.querySelector('[name="title"]') ||
-                        document.getElementById('title');
-
-    const descricaoCampo = form.querySelector('[name="description"]') ||
-                           document.getElementById('description');
-
-    const anexosCampo = form.querySelector('[name="attachments"]') ||
-                        document.getElementById('attachments');
-
-    const occurrenceMsg = document.getElementById('occurrenceMsg');
-
-    if (!localCampo || !categoriaCampo || !tituloCampo || !descricaoCampo) {
-      occurrenceMsg.textContent =
-        'Erro: não foi possível localizar todos os campos do formulário.';
-      return;
-    }
-
-    const files = anexosCampo
-      ? [...anexosCampo.files].map(f => f.name)
-      : [];
-
-    const item = {
-      id: 'OCO-' + Date.now().toString(36).toUpperCase(),
-      location: localCampo.value,
-      category: categoriaCampo.value,
-      title: tituloCampo.value.trim(),
-      description: descricaoCampo.value.trim(),
-      files,
-      created: new Date().toISOString(),
-      priority: 'Não definida',
-      status: 'Recebida',
-      actions: [],
-      history: []
-    };
-
-    let arr = get(DB.occ);
-
-    arr.unshift(item);
-    set(DB.occ, arr);
-
-    logAction(
-      'Secretaria',
-      `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`
-    );
-
-    occurrenceMsg.textContent =
-      'Ocorrência registrada! Protocolo: ' + item.id;
-
-    form.reset();
+  if (page === 'ocorrencias.html') {
+    if (!requireLogin()) return;
 
     renderOccurrenceTable();
-  });
-}
+
+    occurrenceForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const files = [...attachments.files].map(f => f.name);
+
+      const item = {
+        id: 'OCO-' + Date.now().toString(36).toUpperCase(),
+        location: occurrenceForm.elements['location'].value,
+        category: category.value,
+        title: title.value.trim(),
+        description: description.value.trim(),
+        files,
+        created: new Date().toISOString(),
+        priority: 'Não definida',
+        status: 'Recebida',
+        actions: [],
+        history: []
+      };
+
+      let arr = get(DB.occ);
+
+      arr.unshift(item);
+      set(DB.occ, arr);
+
+      logAction(
+        'Secretaria',
+        `Registrou e encaminhou a ocorrência ${item.id} (${item.location})`
+      );
+
+      occurrenceMsg.textContent =
+        'Ocorrência registrada! Protocolo: ' + item.id;
+
+      occurrenceForm.reset();
+
+      renderOccurrenceTable();
+    });
+  }
 
   if (page === 'mapa.html') {
     if (!requireLogin()) return;
@@ -852,3 +840,9 @@ function archiveNotice(id) {
     
      }
       }
+
+// Inicia a página quando o HTML terminar de carregar.
+// Sem esta linha a função init() nunca roda: nenhum formulário ou botão funciona.
+document.addEventListener('DOMContentLoaded', init);
+script.js
+21 KB
