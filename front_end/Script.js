@@ -201,6 +201,7 @@ function init() {
     }
   }
 
+  
   if (page === 'registro.html') {
     const f = document.getElementById('registerForm');
 
@@ -208,7 +209,6 @@ function init() {
       e.preventDefault();
 
       const msg = document.getElementById('registerMsg');
-
       let list = allAccounts();
 
       if (list.length >= MAX_ACCOUNTS) {
@@ -245,29 +245,26 @@ function init() {
         owner: f.owner.value.trim(),
         password: f.regPass.value,
         role: assignedRole,
-        status: 'pendente',
+        status: 'aprovada',
         created: new Date().toISOString()
       });
 
       saveAccounts(list);
 
-      msg.innerHTML =
-        'Cadastro enviado para validação institucional. Perfil atribuído automaticamente: <b>' +
-        assignedRole +
-        '</b>. <a href="validar-demo.html">Abra a tela de simulação de validação</a>. Contas cadastradas: ' +
-        list.length +
-        ' de ' +
-        MAX_ACCOUNTS +
-        '.';
-
       logAction(
         'Configuração inicial',
-        `Cadastro institucional enviado para validação: ${email}`
+        `Conta institucional criada: ${email}`
       );
+
+      sessionStorage.setItem('srsi_logged', '1');
+      sessionStorage.setItem('srsi_logged_email', email);
+
+      msg.textContent = 'Cadastro realizado! Redirecionando...';
+
+      location.href = 'painel.html';
     });
   }
 
-  if (page === 'recuperar.html') {
     document.getElementById('recoverForm')?.addEventListener('submit', e => {
       e.preventDefault();
 
@@ -458,7 +455,7 @@ function init() {
       renderNotices();
     });
   }
-}
+
 
 function renderOccurrenceTable() {
   const rows = get(DB.occ);
