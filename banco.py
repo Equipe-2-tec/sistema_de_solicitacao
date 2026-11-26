@@ -2,6 +2,10 @@ import os
 import mysql.connector
 from mysql.connector import Error
 
+# Flag em memória: evita rodar CREATE TABLE em toda requisição.
+# Em serverless, cada instância "fria" roda uma vez; depois é no-op.
+_tabela_criada = False
+
 
 def conectar():
     """Conecta ao MySQL do Aiven usando variáveis de ambiente."""
@@ -12,31 +16,40 @@ def conectar():
         "password": os.getenv("MYSQL_PASSWORD"),
         "database": os.getenv("MYSQL_DATABASE", "defaultdb"),
         "connection_timeout": 20,
-        "ssl_disabled": False,  # Aiven exige SSL
+        "ssl_disabled": False,   # Aiven exige SSL
     }
-
-    # Opcional: configure MYSQL_SSL_CA com o caminho do certificado CA do Aiven.
-    ssl_ca = os.getenv("MYSQL_SSL_CA")
-    if ssl_ca:
-        config["ssl_ca"] = ssl_ca
-        config["ssl_verify_cert"] = True
-        config["ssl_verify_identity"] = True
 
     if not config["password"]:
         raise RuntimeError("A variável MYSQL_PASSWORD não foi configurada.")
 
+    # CA opcional. IMPORTANTE: na Vercel o arquivo precisa estar commitado
+    # no repositório (ex.: /var/task/ca.pem). Se MYSQL_SSL_CA não for
+    # definido, o driver faz SSL sem verificar o certificado (funciona no Aiven).
+    ssl_ca_path = os.getenv("MYSQL_SSL_CA")
+    if ssl_ca_path and os.path.isfile(ssl_ca_path):
+        config["ssl_ca"] = ssl_ca_path
+        config["ssl_verify_cert"] = True
+        config["ssl_verify_identity"] = True
+    elif ssl_ca_path:
+        # Env var definida mas arquivo ausente: avisa e segue sem verificação
+        print(f"[banco.py] Aviso: MYSQL_SSL_CA='{ssl_ca_path}' não existe. "
+              f"Seguindo com SSL sem verificação de certificado.")
+
     return mysql.connector.connect(**config)
 
 
-def criar_tabela():
+def criar_tabela(forcar=False):
+    global _tabela_criada
+    if _tabela_criada and not forcar:
+        return
+
     conexao = None
     cursor = None
-
     try:
         conexao = conectar()
         cursor = conexao.cursor()
 
-        sql = """
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS contas_institucionais (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(150) NOT NULL,
@@ -45,10 +58,9 @@ def criar_tabela():
             ativo BOOLEAN DEFAULT FALSE,
             status VARCHAR(30) DEFAULT 'Pendente'
         )
-        """
-
-        cursor.execute(sql)
+        """)
         conexao.commit()
+        _tabela_criada = True
         print("Tabela contas_institucionais criada/verificada com sucesso!")
 
     except Error as erro:
@@ -63,5 +75,4 @@ def criar_tabela():
 
 
 if __name__ == "__main__":
-    criar_tabela()
-    
+    criar_tabela(forcar=True)
