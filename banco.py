@@ -1,84 +1,64 @@
-
 import os
 import mysql.connector
 from mysql.connector import Error
 
 
 def conectar():
-    """Conecta ao banco MySQL hospedado no Aiven."""
-
-    configuracao = {
-        "host": os.getenv("MYSQL_HOST"),
-        "port": int(os.getenv("MYSQL_PORT", "3306")),
-        "user": os.getenv("MYSQL_USER"),
+    """Conecta ao MySQL do Aiven usando variáveis de ambiente."""
+    config = {
+        "host": os.getenv("MYSQL_HOST", "mysql-bolsadados.h.aivencloud.com"),
+        "port": int(os.getenv("MYSQL_PORT", "22478")),
+        "user": os.getenv("MYSQL_USER", "avnadmin"),
         "password": os.getenv("MYSQL_PASSWORD"),
         "database": os.getenv("MYSQL_DATABASE", "defaultdb"),
-        "charset": "utf8mb4",
-        "connection_timeout": 15,
-        "autocommit": False,
-        "ssl_disabled": False
+        "connection_timeout": 20,
+        "ssl_disabled": False,  # Aiven exige SSL
     }
 
-    # Certificado SSL do Aiven, caso configurado
-    certificado = os.getenv("MYSQL_SSL_CA")
+    # Opcional: configure MYSQL_SSL_CA com o caminho do certificado CA do Aiven.
+    ssl_ca = os.getenv("MYSQL_SSL_CA")
+    if ssl_ca:
+        config["ssl_ca"] = ssl_ca
+        config["ssl_verify_cert"] = True
+        config["ssl_verify_identity"] = True
 
-    if certificado:
-        configuracao["ssl_ca"] = certificado
-        configuracao["ssl_verify_cert"] = True
+    if not config["password"]:
+        raise RuntimeError("A variável MYSQL_PASSWORD não foi configurada.")
 
-    try:
-        conexao = mysql.connector.connect(**configuracao)
-
-        if conexao.is_connected():
-            return conexao
-
-        raise ConnectionError("Não foi possível conectar ao MySQL.")
-
-    except Error as erro:
-        raise ConnectionError(
-            f"Erro ao conectar ao banco de dados: {erro}"
-        ) from erro
+    return mysql.connector.connect(**config)
 
 
 def criar_tabela():
-    """Cria a tabela de contas institucionais, se não existir."""
-
     conexao = None
     cursor = None
-
-    sql = """
-    CREATE TABLE IF NOT EXISTS contas_institucionais (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(150) NOT NULL,
-        email VARCHAR(150) NOT NULL UNIQUE,
-        senha VARCHAR(255) NOT NULL,
-        ativo BOOLEAN DEFAULT FALSE,
-        status VARCHAR(30) DEFAULT 'Pendente',
-        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
 
     try:
         conexao = conectar()
         cursor = conexao.cursor()
 
+        sql = """
+        CREATE TABLE IF NOT EXISTS contas_institucionais (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(150) NOT NULL,
+            email VARCHAR(150) NOT NULL UNIQUE,
+            senha VARCHAR(255) NOT NULL,
+            ativo BOOLEAN DEFAULT FALSE,
+            status VARCHAR(30) DEFAULT 'Pendente'
+        )
+        """
+
         cursor.execute(sql)
         conexao.commit()
-
         print("Tabela contas_institucionais criada/verificada com sucesso!")
 
     except Error as erro:
-        if conexao and conexao.is_connected():
-            conexao.rollback()
-
-        print(f"Erro ao criar tabela: {erro}")
+        print(f"Erro ao conectar/criar tabela no MySQL: {erro}")
         raise
 
     finally:
-        if cursor:
+        if cursor is not None:
             cursor.close()
-
-        if conexao and conexao.is_connected():
+        if conexao is not None and conexao.is_connected():
             conexao.close()
 
 
