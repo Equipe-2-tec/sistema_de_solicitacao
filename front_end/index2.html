@@ -1,29 +1,103 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Acesso institucional</title><link rel="stylesheet" href="style.css"></head><body>
-<header><a class="brand" href="index2.html">Sistema de Registro de Solicitações</a></header>
-<main class="auth"><section class="card">
-<h1>Bem-vindo!</h1><p class="sub">Sistema institucional para registrar, acompanhar e gerenciar problemas nos ambientes da escola.</p>
-<div class="notice">O sistema utiliza uma única conta institucional compartilhada entre secretaria e gestão. Não são criadas contas individuais para alunos, professores ou funcionários.</div>
-<div id="loginArea"><h2>Já tenho uma conta</h2>
-<div id="loginArea">
-    <h2>Acesso ao sistema</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro institucional</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <p class="sub">
-        Clique no botão abaixo para acessar o sistema.
-    </p>
+<header>
+    <a class="brand" href="index2.html">
+        Sistema de Registro de Solicitações
+    </a>
+</header>
 
-    <div class="actions">
-        <button type="button" onclick="window.location.href='painel.html'">
-            Entrar no sistema
-        </button>
-    </div>
-</div>
-<div class="notice" style="margin-top:16px">
-<strong>Acesso de demonstração</strong><br>
-E-mail: <b>teste.escola@gmail.com</b><br>
-Senha: <b>Escola12345</b><br>
-<button type="button" class="secondary" id="fillDemo" style="margin-top:10px">Preencher acesso de teste</button>
-<small style="display:block;margin-top:8px">Conta fictícia criada automaticamente no primeiro acesso, apenas neste navegador.</small>
-</div></div>
-<hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
-<h2>Primeiro acesso?</h2><p class="sub">Faça a configuração inicial da instituição. O cadastro ficará pendente até a validação institucional.</p><a class="btn" href="registro.html">Criar conta institucional</a>
-</section></main><footer>Protótipo acadêmico • Conta institucional única</footer><script src="script.js"></script></body></html>
+<main class="auth">
+    <section class="card">
+
+        <h1>Criar conta institucional</h1>
+
+        <p class="sub">
+            Preencha os dados para cadastrar sua instituição.
+        </p>
+
+        <div class="notice">
+            Após concluir o cadastro, você será direcionado
+            automaticamente para o painel.
+        </div>
+
+        <form id="registerForm">
+
+            <label for="school">Nome da escola</label>
+            <input id="school" required
+                placeholder="Nome completo da instituição">
+
+            <label for="regEmail">E-mail institucional</label>
+            <input id="regEmail" type="email" required
+                placeholder="E-mail institucional">
+
+            <label for="owner">Nome do responsável</label>
+            <input id="owner" required
+                placeholder="Nome do responsável">
+
+            <label for="regPass">Senha</label>
+            <input id="regPass" type="password"
+                minlength="8" required
+                placeholder="Mínimo de 8 caracteres">
+
+            <label for="regConfirm">Confirmação da senha</label>
+            <input id="regConfirm" type="password"
+                minlength="8" required
+                placeholder="Repita a senha">
+
+            <button type="submit">
+                Criar conta e acessar painel
+            </button>
+
+            <p id="registerMsg" class="muted"></p>
+
+        </form>
+
+        <a class="btn secondary" href="index2.html">
+            Voltar para a página inicial
+        </a>
+
+    </section>
+</main>
+
+<script src="script.js"></script>
+
+<script>
+document.getElementById("registerForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const school = document.getElementById("school").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const owner = document.getElementById("owner").value.trim();
+    const pass = document.getElementById("regPass").value;
+    const confirm = document.getElementById("regConfirm").value;
+    const msg = document.getElementById("registerMsg");
+
+    if (pass !== confirm) {
+        msg.textContent = "As senhas não são iguais.";
+        return;
+    }
+
+    const account = {
+        school: school,
+        email: email,
+        owner: owner,
+        password: pass
+    };
+
+    localStorage.setItem("institutionAccount", JSON.stringify(account));
+    localStorage.setItem("institutionLoggedIn", "true");
+
+    window.location.href = "painel.html";
+});
+</script>
+
+</body>
+</html>
