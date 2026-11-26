@@ -32,11 +32,7 @@
           <input id="senha" type="password" required placeholder="Sua senha">
 
           <div class="actions">
-            
-             <button type="submit">
-                Entrar no sistema
-            </button>
-            
+            <button type="submit">Entrar no sistema</button>
             <a class="btn secondary" href="recuperar.html">Esqueci minha senha</a>
           </div>
         </form>
@@ -68,33 +64,8 @@
 
   <footer>Protótipo acadêmico • Conta institucional única</footer>
 
+  <!-- Toda a lógica de login fica no script.js -->
   <script src="script.js"></script>
 
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-
-      if (senha !== confirm) {
-        msg.textContent = "A senha está incorreta.";
-        return;
-    }
-
-      const account = {
-        email: email,
-        senha: senha,
-         };
-
-    localStorage.setItem("institutionAccount", JSON.stringify(account));
-    localStorage.setItem("institutionLoggedIn", "true");
-
-    window.location.href = "painel.html";
-});
-
-    
-  </script>
-  
 </body>
 </html>
