@@ -8,7 +8,7 @@ Como abrir:
    Senha: Escola12345
    Clique em "Preencher acesso de teste" e depois em "Entrar no sistema".
 4. A conta de demonstração é criada automaticamente no primeiro acesso, se ainda não existir outra conta neste navegador.
-5. Para testar o cadastro institucional, configure o envio de e-mail e o MySQL conforme o README.md. Em registro.html, confirme o código recebido na caixa de entrada.
+5. Para testar o cadastro institucional, configure o Client ID do Google conforme o README.md. Em registro.html, use o botão oficial do Google.
 6. Os dados do painel ficam no localStorage do navegador e não são compartilhados entre computadores.
 
 Arquivos:
@@ -26,8 +26,8 @@ public/style.css  Identidade visual
 public/script.js  Funcionalidades compartilhadas
 
 LIMITAÇÕES IMPORTANTES:
-Este é um protótipo acadêmico. A API Flask pode gravar cadastros no MySQL.
-A validação institucional, autenticação segura, envio real de e-mails, armazenamento de arquivos,
+Este é um protótipo acadêmico. A API Flask confirma contas Gmail pelo Google e mantém o acesso antigo ao MySQL.
+A validação institucional, armazenamento de arquivos,
 permissões verificadas no servidor e sincronização entre dispositivos precisam ser implementados
 em um backend. Não use dados reais ou senhas importantes neste protótipo. O e-mail teste.escola@gmail.com é fictício e não corresponde a uma caixa de entrada Gmail real.
 O mapa é esquemático e deve ser ajustado conforme a planta real da escola.

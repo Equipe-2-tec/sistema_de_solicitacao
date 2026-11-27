@@ -1,10 +1,12 @@
 import os
+import re
 
-from flask import Flask, abort, request, jsonify, render_template, send_from_directory
+from flask import Flask, abort, request, jsonify, render_template, send_from_directory, session
+from google.auth.exceptions import GoogleAuthError
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from jinja2 import TemplateNotFound
-from werkzeug.security import check_password_hash, generate_password_hash
-
-from verificacao_email import codigo_valido, email_valido, enviar_codigo
+from werkzeug.security import check_password_hash
 
 try:
     from banco import conectar, criar_tabela
@@ -15,6 +17,12 @@ except Exception as e:
     _banco_erro = str(e)
 
 app = Flask(__name__, template_folder='front_end', static_folder='static')
+app.config.update(
+    SECRET_KEY=os.environ.get("APP_SESSION_SECRET") or os.urandom(32),
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("VERCEL") == "1",
+)
 
 
 # ===== Páginas e arquivos estáticos =====
@@ -45,6 +53,7 @@ def status_api():
     return jsonify({
         "status": "online",
         "mysql_configurado": banco_configurado,
+        "google_login_configurado": bool(os.environ.get("GOOGLE_CLIENT_ID")),
         "banco_importado": conectar is not None,
         "erro_banco": _banco_erro,
     }), 200
@@ -60,78 +69,85 @@ def campo_texto(dados, nome):
     return valor if isinstance(valor, str) else ""
 
 
-@app.post('/api/cadastro/enviar-codigo')
-def cadastro_enviar_codigo():
-    email = campo_texto(dados_json(), "email").strip().lower()
-    if not email_valido(email):
-        return jsonify({"erro": "Digite um endereço de e-mail válido."}), 400
+def email_valido(email):
+    return len(email) <= 150 and re.fullmatch(
+        r"[a-z0-9_+%=-]+(?:\.[a-z0-9_+%=-]+)*@"
+        r"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}",
+        email,
+    ) is not None
+
+
+def google_client_id():
+    return os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+
+
+@app.get('/api/auth/google/config')
+def google_config():
+    client_id = google_client_id()
+    if not client_id:
+        return jsonify({"erro": "O acesso com Google ainda não foi configurado."}), 503
+    return jsonify({"client_id": client_id})
+
+
+@app.post('/api/auth/google')
+def autenticar_google():
+    client_id = google_client_id()
+    if not client_id:
+        return jsonify({"erro": "O acesso com Google ainda não foi configurado."}), 503
+
+    credential = campo_texto(dados_json(), "credential").strip()
+    if not credential or len(credential) > 8192:
+        return jsonify({"erro": "Resposta do Google inválida."}), 400
 
     try:
-        enviar_codigo(email)
-    except (KeyError, RuntimeError, OSError):
-        app.logger.warning("Falha no envio do código de confirmação.")
-        return jsonify({"erro": "Não foi possível enviar o código agora."}), 503
+        perfil = google_id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            client_id,
+        )
+    except (ValueError, GoogleAuthError):
+        return jsonify({"erro": "Não foi possível confirmar esta conta Google."}), 401
 
-    return jsonify({"mensagem": "Confira sua caixa de entrada e a pasta de spam."}), 202
+    email = str(perfil.get("email") or "").strip().lower()
+    google_sub = str(perfil.get("sub") or "").strip()
+    email_confirmado = perfil.get("email_verified") is True
+
+    if not email_confirmado or not email.endswith("@gmail.com") or not google_sub:
+        return jsonify({"erro": "Use uma conta Gmail confirmada pelo Google."}), 403
+
+    nome = str(perfil.get("name") or "Usuário Google").strip()[:150]
+    session.clear()
+    session["google_sub"] = google_sub
+    session["email"] = email
+    session["nome"] = nome
+
+    return jsonify({
+        "conta": {
+            "id": google_sub,
+            "email": email,
+            "nome": nome,
+        }
+    })
 
 
-@app.post('/api/cadastro')
-def cadastro():
-    dados = dados_json()
-    nome = campo_texto(dados, "nome").strip()
-    email = campo_texto(dados, "email").strip().lower()
-    senha = campo_texto(dados, "senha")
-    codigo = campo_texto(dados, "codigo").strip()
+@app.get('/api/auth/session')
+def sessao_google():
+    if not session.get("google_sub"):
+        return jsonify({"autenticado": False}), 401
+    return jsonify({
+        "autenticado": True,
+        "conta": {
+            "id": session["google_sub"],
+            "email": session.get("email", ""),
+            "nome": session.get("nome", ""),
+        }
+    })
 
-    if not nome or len(nome) > 150 or not email_valido(email) or not 8 <= len(senha) <= 128:
-        return jsonify({"erro": "Confira o nome, o e-mail e a senha (8 a 128 caracteres)."}), 400
 
-    try:
-        confirmado = codigo_valido(email, codigo)
-    except RuntimeError:
-        return jsonify({"erro": "A confirmação por e-mail está indisponível."}), 503
-
-    if not confirmado:
-        return jsonify({"erro": "Código inválido ou expirado. Solicite um novo código."}), 400
-
-    if conectar is None:
-        return jsonify({"erro": "Banco de dados indisponível."}), 503
-
-    conexao = None
-    cursor = None
-
-    try:
-        criar_tabela()
-        conexao = conectar()
-        cursor = conexao.cursor()
-        senha_hash = generate_password_hash(senha)
-
-        cursor.execute("""
-            INSERT INTO contas_institucionais
-            (nome, email, senha, ativo, status)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (nome, email, senha_hash, False, 'Email confirmado'))
-
-        conexao.commit()
-
-        return jsonify({
-            "mensagem": "Cadastro institucional realizado com sucesso!",
-            "status": "Email confirmado"
-        }), 201
-
-    except Exception as erro:
-        if conexao:
-            conexao.rollback()
-        if getattr(erro, "errno", None) == 1062:
-            return jsonify({"erro": "Este e-mail já está cadastrado."}), 409
-        app.logger.error("Falha ao gravar cadastro: %s", type(erro).__name__)
-        return jsonify({"erro": "Não foi possível salvar o cadastro agora."}), 503
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conexao:
-            conexao.close()
+@app.post('/api/auth/logout')
+def logout_google():
+    session.clear()
+    return jsonify({"mensagem": "Sessão encerrada."})
 
 
 @app.post('/api/login')

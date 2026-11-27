@@ -4,20 +4,21 @@
 
 1. Na Vercel, abra **Add New → Project** e importe o repositório atualizado do GitHub.
 2. Use a raiz do repositório como **Root Directory** e **Flask** como **Framework Preset**. Deixe **Build Command** e **Output Directory** com os valores padrão.
-3. Para gravar cadastros no MySQL, adicione `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` e `MYSQL_DATABASE` em **Environment Variables**. Se usar o certificado CA do provedor, inclua o certificado público no projeto e configure `MYSQL_SSL_CA` com o caminho relativo à raiz.
-4. Clique em **Deploy**. Abra a URL gerada para acessar o login e acrescente `/api/status` para verificar se a API responde. O status informa se o host do MySQL foi configurado. A conexão é usada ao gravar um cadastro.
+3. Para manter o acesso antigo por senha no MySQL, adicione `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` e `MYSQL_DATABASE` em **Environment Variables**. Se usar o certificado CA do provedor, inclua o certificado público no projeto e configure `MYSQL_SSL_CA` com o caminho relativo à raiz.
+4. Clique em **Deploy**. Abra a URL gerada para acessar o login e acrescente `/api/status` para verificar se a API responde.
 
-## Ativar confirmação de e-mail
+## Ativar o acesso com Google
 
-O cadastro exige MySQL e um remetente configurado no Resend. Em **Settings → Environment Variables** na Vercel, configure estas variáveis também em **Preview** se quiser testar na branch `vercel-flask`:
+1. No Google Cloud, configure a tela de consentimento OAuth e crie uma credencial do tipo **OAuth client ID → Web application**.
+2. Em **Authorized JavaScript origins**, adicione `https://sistema-de-solicitacao.vercel.app`. Para testar uma prévia, adicione também a origem exata da URL de prévia da Vercel (somente `https://dominio`, sem caminho).
+3. Na Vercel, adicione o ID público dessa credencial como `GOOGLE_CLIENT_ID` nos ambientes **Production** e **Preview**.
+4. Configure `APP_SESSION_SECRET` como segredo com pelo menos 32 bytes aleatórios e faça um novo deploy.
 
-- `RESEND_API_KEY` com uma chave de envio do Resend.
-- `EMAIL_FROM` com um endereço autorizado em um domínio verificado no Resend.
-- `EMAIL_VERIFICATION_SECRET` com uma chave aleatória de pelo menos 32 caracteres. Gere uma com `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+O botão oficial do Google fornece um token de identidade. O servidor confirma a assinatura, a validade, o público e se o Gmail foi verificado. O site aceita somente endereços terminados em `@gmail.com` e usa o identificador estável `sub` do Google para reconhecer a conta.
 
-Republique após configurar. Em `registro.html`, clique em **Enviar código por e-mail**, copie o código recebido e confirme o cadastro em até 15 minutos. O servidor grava a conta somente depois de validar o código para o mesmo endereço.
+Enquanto o aplicativo OAuth estiver no modo de teste, inclua cada conta permitida em **Test users**. Para liberar o acesso ao público, publique a tela de consentimento e conclua qualquer verificação de domínio solicitada pelo Google.
 
-O acesso de demonstração, os dados do painel e o perfil usado pelo painel continuam vinculados ao navegador. As contas locais antigas continuam acessíveis da mesma forma.
+O acesso de demonstração, os dados do painel e o perfil institucional continuam vinculados ao navegador. As contas locais antigas continuam acessíveis da mesma forma. O token do Google nunca é salvo no armazenamento do navegador.
 
 ## Rodar localmente
 

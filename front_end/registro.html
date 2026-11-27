@@ -20,11 +20,11 @@
         <h1>Criar conta institucional</h1>
 
         <p class="sub">
-            Preencha os dados para cadastrar sua instituição.
+            Preencha os dados da instituição e confirme sua conta Gmail.
         </p>
 
         <div class="notice">
-            Confirme o acesso à sua caixa de e-mail para concluir o cadastro.
+            O Google confirmará que a conta existe. Sua senha do Gmail não é enviada para este site.
         </div>
 
         <form id="registerForm">
@@ -33,31 +33,11 @@
             <input id="school" maxlength="150" required
                 placeholder="Nome completo da instituição">
 
-            <label for="regEmail">E-mail institucional</label>
-            <input id="regEmail" type="email" maxlength="150" required
-                placeholder="E-mail institucional">
-
             <label for="owner">Nome do responsável</label>
-            <input id="owner" required
+            <input id="owner" maxlength="150" required
                 placeholder="Nome do responsável">
 
-            <label for="regPass">Senha</label>
-            <input id="regPass" type="password"
-                minlength="8" maxlength="128" required
-                placeholder="Mínimo de 8 caracteres">
-
-            <label for="regConfirm">Confirmação da senha</label>
-            <input id="regConfirm" type="password"
-                minlength="8" maxlength="128" required
-                placeholder="Repita a senha">
-
-            <button type="button" id="sendEmailCode">Enviar código por e-mail</button>
-
-            <label for="emailCode">Código de confirmação</label>
-            <input id="emailCode" required maxlength="512" autocomplete="one-time-code"
-                autocapitalize="off" spellcheck="false">
-
-            <button type="submit" id="btnSubmit">Confirmar código e criar conta</button>
+            <div id="googleRegisterButton" class="google-button"></div>
 
             <p id="registerMsg" class="muted" role="status"></p>
 
@@ -70,6 +50,7 @@
     </section>
 </main>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="script.js"></script>
 
 

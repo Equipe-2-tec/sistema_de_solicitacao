@@ -98,6 +98,10 @@ function requireLogin() {
 }
 
 function logout() {
+  fetch('/api/auth/logout', {
+    method: 'POST',
+    keepalive: true
+  }).catch(() => {});
   sessionStorage.removeItem('srsi_logged');
   sessionStorage.removeItem('srsi_logged_email');
   location.href = 'index2.html';
@@ -116,11 +120,103 @@ async function postJson(url, body) {
   return data;
 }
 
+async function getJson(url) {
+  const response = await fetch(url);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.erro || 'Não foi possível concluir a operação.');
+  }
+  return data;
+}
+
+async function waitForGoogleIdentity() {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (window.google?.accounts?.id) return window.google.accounts.id;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  throw new Error('Não foi possível carregar o acesso do Google.');
+}
+
+async function confirmGoogleAccount(response) {
+  if (!response?.credential) {
+    throw new Error('O Google não retornou uma confirmação válida.');
+  }
+  const data = await postJson('/api/auth/google', {
+    credential: response.credential
+  });
+  return data.conta;
+}
+
+function googleAccount(profile) {
+  return allAccounts().find(account =>
+    account.googleSub === profile.id ||
+    (account.google === true && account.email.toLowerCase() === profile.email)
+  ) || null;
+}
+
+function startSession(account) {
+  sessionStorage.setItem('srsi_logged', '1');
+  sessionStorage.setItem('srsi_logged_email', account.email);
+}
+
+async function renderGoogleButton(elementId, buttonText, callback, message) {
+  const container = document.getElementById(elementId);
+  if (!container) return;
+
+  try {
+    const config = await getJson('/api/auth/google/config');
+    const googleIdentity = await waitForGoogleIdentity();
+    googleIdentity.initialize({
+      client_id: config.client_id,
+      callback,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+    googleIdentity.renderButton(container, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      shape: 'rectangular',
+      text: buttonText,
+      locale: 'pt-BR',
+      width: Math.min(320, Math.max(200, container.clientWidth || 320))
+    });
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
 function init() {
   const page = location.pathname.split('/').pop() || 'index2.html';
 
   if (page === 'index2.html' || page === 'index.html') {
     const f = document.getElementById('loginForm');
+    const googleMessage = document.getElementById('googleLoginMsg');
+
+    renderGoogleButton(
+      'googleLoginButton',
+      'continue_with',
+      async response => {
+        googleMessage.textContent = 'Confirmando sua conta Gmail...';
+        try {
+          const profile = await confirmGoogleAccount(response);
+          const registered = googleAccount(profile);
+          if (!registered) {
+            googleMessage.textContent =
+              'Conta Gmail confirmada. Faça o primeiro cadastro da instituição.';
+            setTimeout(() => { location.href = 'registro.html'; }, 700);
+            return;
+          }
+
+          startSession(registered);
+          logAction('Acesso institucional', `Login com Google: ${registered.email}`);
+          location.href = 'painel.html';
+        } catch (error) {
+          googleMessage.textContent = error.message;
+        }
+      },
+      googleMessage
+    );
 
     const demoEmail = 'teste.escola@gmail.com';
     const demoPassword = 'Escola12345';
@@ -195,6 +291,11 @@ function init() {
           return;
         }
 
+        if (a.google === true) {
+          msg.textContent = 'Esta conta usa o botão Continuar com Google.';
+          return;
+        }
+
         let senhaCorreta = enteredPassword === a.password;
         if (a.emailVerificado) {
           const button = f.querySelector('button[type="submit"]');
@@ -234,90 +335,64 @@ function init() {
 
   
   if (page === 'registro.html') {
-    const f = document.getElementById('registerForm');
-    const msg = document.getElementById('registerMsg');
-    const enviar = document.getElementById('sendEmailCode');
-    const confirmar = document.getElementById('btnSubmit');
+    const form = document.getElementById('registerForm');
+    const message = document.getElementById('registerMsg');
+    form.addEventListener('submit', event => event.preventDefault());
 
-    f.regEmail.addEventListener('input', () => {
-      f.emailCode.value = '';
-      msg.textContent = '';
-    });
+    renderGoogleButton(
+      'googleRegisterButton',
+      'signup_with',
+      async response => {
+        if (!form.reportValidity()) {
+          message.textContent = 'Preencha os dados da instituição antes de continuar.';
+          return;
+        }
 
-    enviar.addEventListener('click', async () => {
-      if (!f.regEmail.reportValidity()) return;
-      const email = f.regEmail.value.trim().toLowerCase();
+        message.textContent = 'Confirmando sua conta Gmail...';
+        try {
+          const profile = await confirmGoogleAccount(response);
+          let list = allAccounts();
+          let registered = list.find(account =>
+            account.googleSub === profile.id ||
+            account.email.toLowerCase() === profile.email
+          );
 
-      enviar.disabled = true;
-      confirmar.disabled = true;
-      f.regEmail.readOnly = true;
-      try {
-        const data = await postJson('/api/cadastro/enviar-codigo', { email });
-        msg.textContent = data.mensagem;
-        f.emailCode.focus();
-      } catch (erro) {
-        msg.textContent = erro.message;
-      } finally {
-        enviar.disabled = false;
-        confirmar.disabled = false;
-        f.regEmail.readOnly = false;
-      }
-    });
+          if (!registered && list.length >= MAX_ACCOUNTS) {
+            message.textContent = 'Limite atingido: este navegador permite no máximo 10 contas.';
+            return;
+          }
 
-    f.addEventListener('submit', async e => {
-      e.preventDefault();
-      const list = allAccounts();
-      const school = f.school.value.trim();
-      const email = f.regEmail.value.trim().toLowerCase();
-      const owner = f.owner.value.trim();
-      const senha = f.regPass.value;
-      const codigo = f.emailCode.value.trim();
+          if (registered) {
+            registered.google = true;
+            registered.googleSub = profile.id;
+            registered.emailVerificado = true;
+            registered.status = 'aprovada';
+            registered.school = form.school.value.trim();
+            registered.owner = form.owner.value.trim();
+          } else {
+            registered = {
+              school: form.school.value.trim(),
+              email: profile.email,
+              owner: form.owner.value.trim(),
+              google: true,
+              googleSub: profile.id,
+              emailVerificado: true,
+              status: 'aprovada',
+              created: new Date().toISOString()
+            };
+            list.push(registered);
+          }
 
-      if (list.length >= MAX_ACCOUNTS) {
-        msg.textContent = 'Limite atingido: o sistema permite no máximo 10 contas.';
-        return;
-      }
-
-      if (list.some(a => a.email.toLowerCase() === email)) {
-        msg.textContent = 'Este e-mail já está cadastrado neste navegador.';
-        return;
-      }
-
-      if (senha !== f.regConfirm.value) {
-        msg.textContent = 'As senhas não correspondem.';
-        return;
-      }
-
-      enviar.disabled = true;
-      confirmar.disabled = true;
-      msg.textContent = 'Confirmando e-mail e criando a conta...';
-      try {
-        await postJson('/api/cadastro', { nome: school, email, senha, codigo });
-      } catch (erro) {
-        msg.textContent = erro.message;
-        return;
-      } finally {
-        enviar.disabled = false;
-        confirmar.disabled = false;
-      }
-
-      try {
-        saveAccounts([...allAccounts(), {
-          school,
-          email,
-          owner,
-          emailVerificado: true,
-          status: 'aprovada',
-          created: new Date().toISOString()
-        }]);
-        sessionStorage.setItem('srsi_logged', '1');
-        sessionStorage.setItem('srsi_logged_email', email);
-        logAction('Configuração inicial', `Conta institucional criada: ${email}`);
-        location.href = 'painel.html';
-      } catch {
-        msg.textContent = 'Conta criada, mas o navegador não conseguiu salvar os dados locais.';
-      }
-    });
+          saveAccounts(list);
+          startSession(registered);
+          logAction('Configuração inicial', `Conta Gmail confirmada: ${profile.email}`);
+          location.href = 'painel.html';
+        } catch (error) {
+          message.textContent = error.message;
+        }
+      },
+      message
+    );
   }
 
   document.getElementById('recoverForm')?.addEventListener('submit', e => {

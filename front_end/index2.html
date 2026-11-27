@@ -21,8 +21,17 @@
         O sistema utiliza uma única conta institucional compartilhada entre secretaria e gestão. Não são criadas contas individuais para alunos, professores ou funcionários.
       </div>
 
+      <div id="googleAccess">
+        <h2>Acessar com Gmail</h2>
+        <p class="sub">O Google confirma que a conta existe antes de liberar o acesso.</p>
+        <div id="googleLoginButton" class="google-button"></div>
+        <p id="googleLoginMsg" class="muted" role="status"></p>
+      </div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+
       <div id="loginArea">
-        <h2>Já tenho uma conta</h2>
+        <h2>Acesso antigo ou demonstração</h2>
 
         <form id="loginForm">
           <label for="email">E-mail institucional</label>
@@ -57,13 +66,14 @@
       <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
 
       <h2>Primeiro acesso?</h2>
-      <p class="sub">Faça a configuração inicial da instituição. O cadastro ficará pendente até a validação institucional.</p>
+      <p class="sub">Cadastre a instituição usando uma conta Gmail válida.</p>
       <a class="btn" href="registro.html">Criar conta institucional</a>
     </section>
   </main>
 
   <footer>Protótipo acadêmico • Conta institucional única</footer>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="script.js"></script>
 
 
